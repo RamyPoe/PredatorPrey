@@ -42,16 +42,43 @@ public class PhysicsWorld {
             checkCollisions(dtsub);
             applyConstraint();
             updateObjects(dtsub);
+            PredatorIsDead();
+            HaltPrey();
 
         }
 
+    }
+
+    // Constantly reduces energy of predator. If predator reaches 0 energy then it is removed from the array. 
+    private void PredatorIsDead() {
+        for (int i = 0; i < entities.size; i++) {
+            Entity e = entities.get(i); 
+            if (e instanceof Predator) {
+                if (((Predator) e).getEnergy() == 0) {
+                    entities.removeIndex(i);
+                }
+                ((Predator) e).deleteEnergy();
+            }
+        }
+    }
+    // Constantly reduces energy of prey. If prey reaches 0 energy then the velocity and acceleration is set to 0. 
+    public void HaltPrey () {
+        for (int i = 0; i < entities.size; i++) {
+            Entity e = entities.get(i); 
+            if (e instanceof Prey) {
+                if (((Prey) e).getEnergy() == 0) {
+                    e.setVelocity(0, 0);
+                }
+                ((Prey) e).deleteEnergy();
+            }
+        }
     }
 
 
     // Checks and mitigates entityoverlapping
     private void checkCollisions(float dt) {
 
-        final float responseCoef = 0.75f;
+        final float responseCoef = 0.1f;
 
         // Check every entity with every other
         for (int i = 0; i < entities.size; i++) {
@@ -66,18 +93,35 @@ public class PhysicsWorld {
                 // Ignore if not touching
                 if (dist > minDist) { continue; }
 
-                // Normalize delta
-                Vector2 n1 = new Vector2(e1.getPositionVector()).sub(e2.getPositionVector()).nor();
-                Vector2 n2 = new Vector2(n1);
+                // If there is a mismatch in predator and prey... 
+                else if ((e1 instanceof Predator && e2 instanceof Prey) || (e1 instanceof Prey && e2 instanceof Predator)) {
+                    // Remove eaten prey.
+                    if (e1 instanceof Prey) {
+                        entities.removeIndex(i); 
+                        ((Predator) e2).gainEnergy(); 
+                    }
+                    if (e2 instanceof Prey) {
+                        entities.removeIndex(j);
+                        ((Predator)e1).gainEnergy(); 
+                    }
+                }
+                else {
+                    // Normalize delta
+                    Vector2 n1 = new Vector2(e1.getPositionVector()).sub(e2.getPositionVector()).nor();
+                    Vector2 n2 = new Vector2(n1);
 
-                // Ratio of movement
-                float ratio1 = e1.getRadius() / minDist;                
-                float ratio2 = e2.getRadius() / minDist;
-                
-                // Apply changes
-                float delta = 0.5f * responseCoef * (dist - minDist);
-                e1.getPositionVector().sub(n1.scl(ratio2 * delta));
-                e1.getPositionVector().sub(n2.scl(ratio1 * delta));
+                    // Ratio of movement
+                    float ratio1 = e1.getRadius() / minDist;                
+                    float ratio2 = e2.getRadius() / minDist;
+                    
+                    // Apply changes
+                    float delta = 0.5f * responseCoef * (dist - minDist);
+                    e1.getPositionVector().sub(n1.scl(ratio2 * delta));
+                    e2.getPositionVector().add(n2.scl(ratio1 * delta));
+
+                }
+
+ 
 
             }
         }

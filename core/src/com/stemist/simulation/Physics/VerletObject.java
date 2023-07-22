@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 public class VerletObject {
     
     // Properties
+    private Vector2 displacement;
     protected Vector2 position;
     protected Vector2 position_last;
     protected Vector2 acceleration;
@@ -15,13 +16,14 @@ public class VerletObject {
         this.position = new Vector2(position);
         this.position_last = new Vector2(position);
         this.acceleration = new Vector2(0, 0);
+        this.displacement = new Vector2(0, 0);
 
     }
 
     // Update position
     public void update(float dt) {
         // Get displacement
-        Vector2 displacement = new Vector2(position).sub(position_last);
+        displacement.set(position).sub(position_last);
 
         // Update from last
         position_last.set(position);
@@ -45,7 +47,7 @@ public class VerletObject {
     }
 
     // Set the velocity
-    public void setVelocity(Vector2 v, float dt) {
+    protected void setVelocity(Vector2 v, float dt) {
         position_last.set(position).sub(v.scl(dt));
     }
 

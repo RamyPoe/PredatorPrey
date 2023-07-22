@@ -5,8 +5,11 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.Array;
 import com.stemist.simulation.MainWindow;
+import java.util.Random; 
 
 public class PhysicsRenderer {
+    Random random = new Random(); 
+    boolean isHeads = random.nextBoolean(); 
     
     // For drawing
     private ShapeRenderer renderer;
@@ -37,13 +40,30 @@ public class PhysicsRenderer {
 
         // Begin renderer
         renderer.begin(ShapeType.Filled);
-        renderer.setColor(Color.WHITE);
-
+        
         // Render every shape
         for (int i = 0; i < e.size; i++) {
+            Entity en = e.get(i);
+            
             // Draw a circle
-            renderer.circle(e.get(i).getX(), e.get(i).getY(), e.get(i).getRadius());
-            // System.out.println("CIRCLE: " + e.get(i).getX() + " " + e.get(i).getY() + " " + e.get(i).getRadius());
+
+            if (en instanceof Prey) {
+                renderer.setColor(Color.GREEN);
+                renderer.circle(en.getX(), en.getY(), en.getRadius());
+            }
+            else {
+                renderer.setColor(Color.RED); 
+                renderer.circle(en.getX(), en.getY(), en.getRadius()); 
+            }
+
+            // Show direction
+            renderer.setColor(Color.LIGHT_GRAY);
+            renderer.circle(
+                en.getX() + (float) Math.cos(Math.toRadians(en.getAngle())) * (en.getRadius()-10),
+                en.getY() + (float) Math.sin(Math.toRadians(en.getAngle())) * (en.getRadius()-10),
+                10f
+            );
+            // System.out.println("CIRCLE: " + en.getX() + " " + en.getY() + " " + en.getRadius());
         }
 
         // End renderer

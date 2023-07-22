@@ -7,14 +7,24 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.stemist.simulation.MainWindow;
 import com.stemist.simulation.Physics.Entity;
+import com.stemist.simulation.Physics.Predator; 
+import com.stemist.simulation.Physics.Prey; 
 import com.stemist.simulation.Physics.PhysicsWorld;
 import com.stemist.simulation.Physics.PhysicsRenderer;
+import java.util.Random; 
+ 
+
 
 public class GameScreen implements Screen {
+
+
+    // To keep track of time 
+    long startTime = TimeUtils.millis();
 
     // To change screens
     MainWindow main;
@@ -57,6 +67,7 @@ public class GameScreen implements Screen {
 
     // Processing
     private void update(float delta) {
+
         
         // Move camera
         if (Gdx.input.isKeyPressed(Input.Keys.W) && cam.position.y < MainWindow.GAME_MAX_TOP)    { cam.position.y += CAM_SPEED_FACTOR * delta; }
@@ -73,20 +84,33 @@ public class GameScreen implements Screen {
             return;
         }
 
+
+    
+
         // Check click
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
             main.transition.fadeOut(MainWindow.SCREEN.MENU);
         }
 
-        // Spawn entity
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
-            pWorld.addEntity(new Entity(new Vector2(spawn, spawn), 30));
+        // Spawn Prey 
+        if (Gdx.input.isKeyPressed(Input.Keys.N)) {
+                Entity e = new Prey(new Vector2(spawn, spawn), 30);
+                e.setVelocity(100, delta);
+                pWorld.addEntity(e);
         }
-
+        
+        // Spawn Predators 
+        if (Gdx.input.isKeyPressed(Input.Keys.M)) {
+                Entity e = new Predator(new Vector2(spawn, spawn), 30); 
+                e.setVelocity(100, delta); 
+                pWorld.addEntity(e); 
+        }
     }
 
     @Override
     public void render(float delta) {
+        long elapsedTime = (TimeUtils.timeSinceMillis(startTime)/1000);
+        System.out.println(elapsedTime);
 
         // Seperate logic from rendering
         update(delta);
