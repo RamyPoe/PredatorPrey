@@ -4,7 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -19,8 +25,11 @@ public class MenuHud implements Disposable {
     private OrthographicCamera cam;
 
     // Assets
-    public Texture backgroundTexture;
+    private Texture backgroundTexture;
 
+    // Buttons
+    public ImageButton startBtn;
+    public ImageButton configBtn;
 
     // Constructor
     public MenuHud(SpriteBatch sb) {
@@ -32,8 +41,33 @@ public class MenuHud implements Disposable {
         // Stage
         stage = new Stage(viewport, sb);
 
+        // Start button
+        Drawable startBtnTexture = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("menu/startBtn.png"))));
+        startBtn = new ImageButton(startBtnTexture);
+        
+        // Config button
+        Drawable configBtnTexture = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("menu/configBtn.png"))));
+        configBtn = new ImageButton(configBtnTexture);
+
+        // Table to add buttons to
+        Table table = new Table();
+        table.setFillParent(true);
+        table.bottom();
+        table.padBottom(200);
+
+        table.add(startBtn).align(Align.center).padBottom(50);
+        table.row();
+        table.add(configBtn).align(Align.center);
+        
+
+        // Add table to stage
+        stage.addActor(table);
+
+        // So that button clicks work
+        Gdx.input.setInputProcessor(stage);
+
         // Background image
-        backgroundTexture = new Texture(Gdx.files.internal("menu/background.jpg"));
+        backgroundTexture = new Texture(Gdx.files.internal("menu/background.png"));
 
     }
 
@@ -61,6 +95,8 @@ public class MenuHud implements Disposable {
     
     @Override
     public void dispose() {
+        backgroundTexture.dispose();
+        stage.dispose();
     }
     
 }
