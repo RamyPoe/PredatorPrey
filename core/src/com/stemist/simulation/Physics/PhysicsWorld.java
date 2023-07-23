@@ -5,6 +5,8 @@ import com.badlogic.gdx.utils.Array;
 import com.stemist.simulation.MainWindow;
 import com.stemist.simulation.Game.Predator;
 import com.stemist.simulation.Game.Prey;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class PhysicsWorld {
     
@@ -21,6 +23,12 @@ public class PhysicsWorld {
     // Used for neural net
     private float[] netIn = new float[MainWindow.ENTITY_NUM_RAYS+1];
     private float[] netOut;
+
+
+    // Used for text display 
+    private SpriteBatch spriteBatch = new SpriteBatch(); 
+    private BitmapFont font = new BitmapFont(); 
+
 
     // Constructor
     public PhysicsWorld() {
@@ -60,9 +68,15 @@ public class PhysicsWorld {
         applyConstraint();
         updateObjects(dt);
 
+        
+
         // PredatorIsDead();
         // HaltPrey();
         //displayRays();
+        spriteBatch.begin(); 
+        font.getData().setScale(1, 1);
+        font.draw(spriteBatch, "Hello World", 100, 100);
+        spriteBatch.end();
             
 
     }
@@ -238,6 +252,14 @@ public class PhysicsWorld {
             e.update(dt);
         }
 
+    }
+
+    public int getPredators() { 
+        return numPred; 
+    }
+
+    public int getPrey() { 
+        return numPrey;
     }
 
     
