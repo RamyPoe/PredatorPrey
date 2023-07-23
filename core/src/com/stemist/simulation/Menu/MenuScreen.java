@@ -64,12 +64,13 @@ public class MenuScreen implements Screen {
 
         // Check buttons
         if (btnPressed == BUTTON.BTN_START) {
-            System.out.println("START BUTTON PRESSED");
             main.transition.fadeOut(MainWindow.SCREEN.GAME);
             btnPressed = BUTTON.BTN_NONE;
         }
         if (btnPressed == BUTTON.BTN_CONFIG) {
             System.out.println("CONFIG BUTTON PRESSED");
+            main.transition.fadeOut(MainWindow.SCREEN.CONFIG);
+            
             btnPressed = BUTTON.BTN_NONE;
         }
     }
