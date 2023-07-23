@@ -29,7 +29,7 @@ public class PhysicsRenderer {
         // Game box limits
         renderer.begin(ShapeType.Filled);
         // renderer.setColor(153, 204, 255, 1);
-        renderer.setColor(Color.BLUE);
+        renderer.setColor(135f / 255f, 206f / 255f, 250f / 255f, 1f);
         renderer.rect(MainWindow.GAME_MAX_LEFT, MainWindow.GAME_MAX_BOTTOM, MainWindow.GAME_MAX_RIGHT-MainWindow.GAME_MAX_LEFT, MainWindow.GAME_MAX_TOP-MainWindow.GAME_MAX_BOTTOM);
         renderer.end();
 
