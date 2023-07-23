@@ -5,6 +5,8 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -13,12 +15,25 @@ import com.stemist.simulation.MainWindow;
 import com.stemist.simulation.Physics.Entity;
 import com.stemist.simulation.Physics.PhysicsWorld;
 import com.stemist.simulation.Physics.PhysicsRenderer;
-import java.util.Random; 
+import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.graphics.Color;
+ 
  
 
 
 public class GameScreen implements Screen {
+    // Timer 
+    private long startTime = TimeUtils.millis(); 
+    private float elapsedTime;
 
+    // Predator and Prey Counter
+    private int maxPredatorCount = 0; 
+    private int maxPreyCount = 0; 
+
+    // Used for text display 
+    private SpriteBatch spriteBatch = new SpriteBatch(); 
+    private BitmapFont font = new BitmapFont(); 
+ 
     // To change screens
     MainWindow main;
 
@@ -35,6 +50,7 @@ public class GameScreen implements Screen {
     
     // Constructor
     public GameScreen(MainWindow main) {
+
         // For changing screens
         this.main = main;
 
@@ -93,56 +109,14 @@ public class GameScreen implements Screen {
             main.transition.fadeOut(MainWindow.SCREEN.MENU);
         }
 
-        /*
-        // Move self
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            self.setVelocity(1, delta);
-        }
-        else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            self.setVelocity(-1, delta);
-        } else {
-            self.setVelocity(0, delta);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            self.changeAngle(1, delta);
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            self.changeAngle(-1, delta);
-        }
-        */
+        elapsedTime = (TimeUtils.millis() - startTime)/1000; 
 
-        /*
-        // Spawn Prey 
-        if (Gdx.input.isKeyPressed(Input.Keys.N)) {
-                Entity e = new Prey(new Vector2(spawn, spawn));
-                e.setVelocity(100, delta);
-                pWorld.addEntity(e);
+        if (pWorld.getPredators() > maxPredatorCount) {
+            maxPredatorCount = pWorld.getPredators();
         }
-        
-        // Spawn Predators 
-        if (Gdx.input.isKeyPressed(Input.Keys.M)) {
-                Entity e = new Predator(new Vector2(spawn, spawn)); 
-                e.setVelocity(100, delta); 
-                pWorld.addEntity(e); 
+        if (pWorld.getPrey() > maxPreyCount) {
+            maxPreyCount = pWorld.getPrey();
         }
-        */
-
-        /*
-        // Randomly spawns entities (1/1000) based on whether or not they have survived on top of a selected entity. 
-        Random rand = new Random();
-        int result; 
-        for (int i = 0; i < pWorld.getEntities().size; i++) { 
-            Entity selectEntity = pWorld.getEntities().get(i);
-            result = rand.nextInt(1000-1) + 1; 
-            //System.out.println(result); 
-            if (result == 500) {
-                Entity e = new Prey(new Vector2(selectEntity.getX(),selectEntity.getY()), 30);
-                e.setVelocity(100, delta);
-                pWorld.addEntity(e);
-            }
-        }
-        */
-
     }
 
     @Override
@@ -166,9 +140,18 @@ public class GameScreen implements Screen {
 
         // Prepare to draw
         main.batch.begin();
+        
 
-        // Draw stuf
-
+        // Display all data such as seconds elapsed, the number of prey, max number of prey, etc. 
+        spriteBatch.begin(); 
+        font.getData().setScale(2, 2);
+        font.setColor(Color.WHITE);
+        font.draw(spriteBatch, "Seconds Elapsed: " + elapsedTime, 10, 784);
+        font.draw(spriteBatch, "Prey Number: " + pWorld.getPrey(), 10, 724);
+        font.draw(spriteBatch, "Predator Number: " + pWorld.getPredators(), 10, 754); 
+        font.draw(spriteBatch, "Max Predators: " + maxPredatorCount, 10, 694); 
+        font.draw(spriteBatch, "Max Prey: " + maxPreyCount, 10, 664); 
+        spriteBatch.end();
 
         // Done drawing
         main.batch.end();
