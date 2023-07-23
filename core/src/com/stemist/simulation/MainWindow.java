@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.stemist.simulation.Configuration.ConfigScreen;
 import com.stemist.simulation.Game.GameScreen;
 import com.stemist.simulation.Menu.MenuScreen;
 import com.stemist.simulation.Transition.Transition;
@@ -16,7 +17,8 @@ public class MainWindow extends Game {
 	// Determining which screen to draw
 	public static enum SCREEN {
 		MENU,
-		GAME
+		GAME, 
+		CONFIG
 	}
 	private static SCREEN cur_screen = SCREEN.MENU;
 	private static SCREEN new_screen = SCREEN.MENU;
@@ -96,9 +98,11 @@ public class MainWindow extends Game {
 				case MENU:
 					setScreen(new MenuScreen(this));
 					break;
-
 				case GAME:
 					setScreen(new GameScreen(this));
+					break;
+				case CONFIG:
+					setScreen(new ConfigScreen(this));
 					break;
 			}
 		}
