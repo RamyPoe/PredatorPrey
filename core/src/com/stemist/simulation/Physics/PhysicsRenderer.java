@@ -1,16 +1,14 @@
 package com.stemist.simulation.Physics;
-
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
 import com.badlogic.gdx.utils.Array;
 import com.stemist.simulation.MainWindow;
-import java.util.Random; 
 
 public class PhysicsRenderer {
-    Random random = new Random(); 
-    boolean isHeads = random.nextBoolean(); 
-    
+
     // For drawing
     private ShapeRenderer renderer;
 
@@ -46,15 +44,8 @@ public class PhysicsRenderer {
             Entity en = e.get(i);
             
             // Draw a circle
-
-            if (en instanceof Prey) {
-                renderer.setColor(Color.GREEN);
-                renderer.circle(en.getX(), en.getY(), en.getRadius());
-            }
-            else {
-                renderer.setColor(Color.RED); 
-                renderer.circle(en.getX(), en.getY(), en.getRadius()); 
-            }
+            renderer.setColor(en.getColor());
+            renderer.circle(en.getX(), en.getY(), en.getRadius()); 
 
             // Show direction
             renderer.setColor(Color.LIGHT_GRAY);
@@ -63,7 +54,38 @@ public class PhysicsRenderer {
                 en.getY() + (float) Math.sin(Math.toRadians(en.getAngle())) * (en.getRadius()-10),
                 10f
             );
-            // System.out.println("CIRCLE: " + en.getX() + " " + en.getY() + " " + en.getRadius());
+
+            // Draw when key held
+            if (!Gdx.input.isKeyPressed(Input.Keys.B)) {
+                continue;
+            }
+
+            // Get rays instance
+            Rays r = en.getRays();
+
+            // Ray color
+            renderer.setColor(Color.WHITE);
+
+            // Draw the ray lines
+            float startAngle = en.getAngle() - r.getFov()/2;
+            float stepAngle = r.getFov()/(r.getNumRays()-1);
+            Ray ray = new Ray();
+
+            for (int j = 0; j < r.getNumRays(); j++) {
+
+                // Get angle for this ray
+                float angle = (startAngle + j*stepAngle) % 360;
+
+                // Setup this ray
+                ray.origin.set(en.getPositionVector());
+                ray.end.set(r.getRayDistance() * r.getRayCollisions(j), 0);
+                ray.end.setAngleDeg(angle);
+                ray.end.add(ray.origin);
+
+                // Draw line
+                renderer.rectLine(ray.origin.x, ray.origin.y, ray.end.x, ray.end.y, 2);
+            }
+
         }
 
         // End renderer

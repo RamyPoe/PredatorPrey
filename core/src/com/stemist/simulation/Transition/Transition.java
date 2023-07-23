@@ -61,7 +61,6 @@ public class Transition {
     // To fade out
     public void fadeOut(MainWindow.SCREEN s) {
         haveFadedIn = false;
-        // haveFadedOut = false;
         
         this.screen = s;
         fadeIn = false;
@@ -72,7 +71,6 @@ public class Transition {
     // To fade in
     public void fadeIn() {
         haveFadedIn = true;
-        // haveFadedOut = true;
 
         this.screen = null;
         fadeIn = true;
@@ -110,8 +108,6 @@ public class Transition {
                 game.setGameScreen(screen);
             }
 
-            // if (!fadeIn)
-                // haveFadedOut = true;
         }
 
     }

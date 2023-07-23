@@ -46,6 +46,12 @@ public class VerletObject {
         return vel;
     }
 
+    // Get magnitude of velocity
+    public float getVelMagnitude(float dt) {
+        Vector2 vel = getVelocity(dt);
+        return (float) Math.sqrt(vel.x * vel.x + vel.y * vel.y);
+    }
+
     // Set the velocity
     protected void setVelocity(Vector2 v, float dt) {
         position_last.set(position).sub(v.scl(dt));
