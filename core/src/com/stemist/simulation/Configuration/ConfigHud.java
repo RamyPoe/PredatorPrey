@@ -39,8 +39,8 @@ public class ConfigHud implements Disposable {
     private int reproductiveRate; 
 
     // Constructor
-    public ConfigHud(SpriteBatch sb, int reproductiveRate) {
-        this.reproductiveRate = reproductiveRate; 
+    public ConfigHud(SpriteBatch sb) {
+
         // For prespective
         cam = new OrthographicCamera();
         viewport = new FitViewport(MainWindow.V_WIDTH, MainWindow.V_HEIGHT, cam);
@@ -54,24 +54,6 @@ public class ConfigHud implements Disposable {
         table.padBottom(200);
  
         
-        // Draw buttons 
-        Drawable reproductionBtnTexture = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("menu/reproductiveBtn.png"))));
-        reproductiveSpeedIncreaseBtn = new ImageButton(reproductionBtnTexture);
-
-        Drawable deproductionBtnTexture = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("menu/deproductiveBtn.png"))));
-        reproductiveSpeedDecreaseBtn = new ImageButton(deproductionBtnTexture);
-
-        Drawable saveBtnTexture = new TextureRegionDrawable(new TextureRegion(new Texture(Gdx.files.internal("menu/saveReproductive.png"))));
-        saveBtn = new ImageButton(saveBtnTexture); 
-
-        // Configure table to add buttons. 
-        table.add(reproductiveSpeedIncreaseBtn).align(Align.right).padBottom(50);
-        table.row();
-        table.add(reproductiveSpeedDecreaseBtn).align(Align.right).padBottom(50);
-        table.row(); 
-        table.add(saveBtn).align(Align.right); 
-                    
-
         // Add table to stage
         stage.addActor(table);
         
@@ -84,9 +66,6 @@ public class ConfigHud implements Disposable {
 
     }
 
-    public void updateReproductiveRateLabel(int reproductiveRate) {
-
-    }
 
     // Called every loop
     public void draw() {

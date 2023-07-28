@@ -5,8 +5,6 @@ import com.badlogic.gdx.utils.Array;
 import com.stemist.simulation.MainWindow;
 import com.stemist.simulation.Game.Predator;
 import com.stemist.simulation.Game.Prey;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 public class PhysicsWorld {
     
@@ -14,20 +12,16 @@ public class PhysicsWorld {
     private Array<Entity> entities;
 
     // No energy until inital deaths
-    private int gracePeriod = 20;
+    private int gracePeriod = MainWindow.PREADTOR_GRACE_PERIOD;
 
     // Count of each species
-    public static int numPrey = 0;
-    public static int numPred = 0;
+    public int numPrey = 0;
+    public int numPred = 0;
 
     // Used for neural net
     private float[] netIn = new float[MainWindow.ENTITY_NUM_RAYS+1];
     private float[] netOut;
 
-
-    // Used for text display 
-    private SpriteBatch spriteBatch = new SpriteBatch(); 
-    private BitmapFont font = new BitmapFont(); 
 
 
     // Constructor
@@ -38,20 +32,14 @@ public class PhysicsWorld {
 
     }
 
-    // Add a new entity
+    // Add a new entity wihtin count limits
     public void addEntity(Entity e) {
         if (e instanceof Prey) {
-            if (entities.size >= MainWindow.MAX_PREY) {
-                return;
-            } else {
-                numPrey++;
-            }
+            if (numPrey >= MainWindow.MAX_PREY) { return; }
+            numPrey++;
         } else {
-            if (entities.size >= MainWindow.MAX_PREDATORS) {
-                return;
-            } else {
-                numPred++;
-            }
+            if (numPred >= MainWindow.MAX_PREDATORS) { return; }
+            numPred++;
         }
         entities.add(e);
     }
@@ -68,23 +56,13 @@ public class PhysicsWorld {
         applyConstraint();
         updateObjects(dt);
 
-        
-
-        // PredatorIsDead();
-        // HaltPrey();
-        //displayRays();
-        spriteBatch.begin(); 
-        font.getData().setScale(1, 1);
-        font.draw(spriteBatch, "Hello World", 100, 100);
-        spriteBatch.end();
-            
-
     }
 
     // Checks and mitigates entity overlapping as well as calculating ray distances
     private void checkEntities(float dt) {
 
-        final float responseCoef = 0.1f;
+        // How "squishy" collisions are
+        final float responseCoef = 0.7f;
 
         // Reset them all before checking collision
         for (int i = 0; i < entities.size;) {
@@ -94,31 +72,31 @@ public class PhysicsWorld {
 
             // Prepare neural net input with bias neuron
             for (int j = 0; j < MainWindow.ENTITY_NUM_RAYS; j++) {
-                netIn[j] = e.getRays().getRayCollisions(j);
+                netIn[j] = 1f - e.getRays().getRayCollisions(j);
             }
-            netIn[netIn.length-1] = 0.2f;
+            netIn[netIn.length-1] = 1f;
 
             // Get output
             netOut = e.brain.forward(netIn);
 
-            // Apply outputs with deadzone
-            e.changeAngle(netOut[0], dt);
+            // Apply output
+            e.changeAngle(netOut[0] * MainWindow.ENTITY_MAX_ANGLE_VEL, dt);
 
             // Reset rays
             e.getRays().resetRays();
 
             
-
             // If predator loses energy it dies
             if (e instanceof Predator) {
 
                 // Predator can't move backward
-                e.setVelocity((netOut[1]+1)/2, dt);
+                e.setVelocity((netOut[1] > 0 ? netOut[1] : netOut[1]*0.2f) * MainWindow.ENTITY_MAX_VEL, dt);
 
-                if (gracePeriod <= 0) {
-                    // Change energy
-                    e.changeEnergy(dt);
-                }
+                // Predators can start dying now
+                e.changeEnergy(dt);
+                // if (gracePeriod <= 0) {
+                    // e.changeEnergy(dt);
+                // }
 
                 if (e.getEnergy() <= 0) {
                     entities.removeIndex(i);
@@ -127,13 +105,15 @@ public class PhysicsWorld {
                 }
             }
 
-            // If prey then check for split
+            // If entity is a prey
             else {
 
-                // Neural network output
-                e.setVelocity(Math.abs(netOut[1]) < 0.1 ? 0f : (netOut[0]-0.1f)*1.11f, dt);
+                // Neural network output with deadzone
+                // e.setVelocity((Math.abs(netOut[1]) < 0.1 ? 0f : netOut[0]) * MainWindow.ENTITY_MAX_VEL, dt);
+                e.setVelocity(netOut[1] * MainWindow.ENTITY_MAX_VEL, dt);
 
-                ((Prey) e).checkSplit(entities);
+                // Check for split
+                ((Prey) e).checkSplit(this);
 
                 // Change energy
                 e.changeEnergy(dt);
@@ -147,8 +127,8 @@ public class PhysicsWorld {
         // Size before we make reproductions
         int enSize = entities.size;
 
-        // If entity was removed don't increment
-        boolean incrI = true;
+        // If entity was removed don't increment loop
+        boolean incr_i = true;
 
         // Check every entity with every other
         for (int i = 0; i < enSize;) {
@@ -160,11 +140,11 @@ public class PhysicsWorld {
             Rays e1Rays = e1.getRays();
 
             // Reset flag
-            incrI = true;
+            incr_i = true;
 
-            // Chance to split during grace
-            if (gracePeriod > 0 && e1 instanceof Predator && Math.random() < 0.001) {
-                ((Predator) e1).split(entities);
+            // Predator has chance to split during grace period
+            if (gracePeriod > 0 && e1 instanceof Predator && Math.random() < 0.003) {
+                ((Predator) e1).split(this);
             }
             
             // Check with every other entity
@@ -176,11 +156,11 @@ public class PhysicsWorld {
                 // Check for ray collisions as well
                 Rays e2Rays = e2.getRays();
 
-                // Get distance between them
+                // Get distance between the entities
                 float dist = e1.getPositionVector().dst(e2.getPositionVector());
                 float minDist = e1.getRadius() + e2.getRadius();
 
-                // Check ray collisions
+                // Check ray collisions if applicable
                 if ((e1 instanceof Predator && e2 instanceof Prey) || (e1 instanceof Prey && e2 instanceof Predator)) {
                     e1Rays.checkRaysHits(e1, e2);
                     e2Rays.checkRaysHits(e2, e1);
@@ -193,14 +173,14 @@ public class PhysicsWorld {
                 if ((e1 instanceof Predator && e2 instanceof Prey) ||
                         (e1 instanceof Prey && e2 instanceof Predator)) {
 
-                    // Drop grace period
+                    // Reduce grace period
                     gracePeriod--;
                     
                     // Remove eaten prey
                     Entity eTemp = null;
                     if (e1 instanceof Prey) {
                         entities.removeIndex(i);
-                        incrI = false;
+                        incr_i = false;
                         eTemp = e2;
                         j++;
                     }
@@ -210,15 +190,18 @@ public class PhysicsWorld {
                     }
 
                     ((Predator) eTemp).madeKill();
-                    ((Predator) eTemp).checkSplit(entities);
+                    ((Predator) eTemp).checkSplit(this);
 
-                    // Reduce size of originals
+                    // Reduce number of original entities remaining
                     enSize--;
-                    numPrey--;
 
+                    // Keep count
+                    numPrey--;
                 }
 
+                // If not killing then collide
                 else {
+
                     // Normalize delta
                     Vector2 n1 = new Vector2(e1.getPositionVector()).sub(e2.getPositionVector()).nor();
                     Vector2 n2 = new Vector2(n1);
@@ -240,12 +223,12 @@ public class PhysicsWorld {
             }
 
             // Increment next entity
-            if (incrI) i++;
+            if (incr_i) i++;
 
         }
     }
 
-
+    // Update the physics model for each entity
     private void updateObjects(float dt) {
 
         for (Entity e : entities) {
@@ -255,14 +238,18 @@ public class PhysicsWorld {
     }
 
     public int getPredators() { 
-        return numPred; 
+        return numPred;
     }
 
     public int getPrey() { 
         return numPrey;
     }
 
-    
+    public int getGraceCount() {
+        return gracePeriod > 0 ? gracePeriod : 0;
+    }
+
+    // Apply world constraints to all entities
     private void applyConstraint() {
 
         // Game box

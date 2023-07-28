@@ -15,20 +15,16 @@ import com.stemist.simulation.MainWindow;
 import com.stemist.simulation.Physics.Entity;
 import com.stemist.simulation.Physics.PhysicsWorld;
 import com.stemist.simulation.Physics.PhysicsRenderer;
-import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.graphics.Color;
  
  
 
 
 public class GameScreen implements Screen {
-    // Timer 
-    private long startTime = TimeUtils.millis(); 
-    private float elapsedTime;
 
-    // Predator and Prey Counter
-    private int maxPredatorCount = 0; 
-    private int maxPreyCount = 0; 
+    // Timer 
+    private long startTime = MainWindow.getTimeMs();
+    private float elapsedTime;
 
     // Used for text display 
     private SpriteBatch spriteBatch = new SpriteBatch(); 
@@ -40,8 +36,8 @@ public class GameScreen implements Screen {
     // For prespective
     private OrthographicCamera cam;
     private Viewport viewport;
-    public static final float CAM_SPEED_FACTOR = 800f;
-    public static final float CAM_ZOOM_FACTOR = 10f;
+    public static final float CAM_SPEED_FACTOR = 1200f;
+    public static final float CAM_ZOOM_FACTOR = 13f;
 
     // Game world
     PhysicsWorld pWorld;
@@ -69,8 +65,8 @@ public class GameScreen implements Screen {
 
         // Spawn inital
         Vector2 pos = new Vector2(0, 0);
-        for (int i = MainWindow.GAME_MAX_LEFT + 50 + MainWindow.ENTITY_RADIUS; i < MainWindow.GAME_MAX_RIGHT; i += MainWindow.ENTITY_RADIUS*20) {
-            for (int j = MainWindow.GAME_MAX_BOTTOM + 50 + MainWindow.ENTITY_RADIUS; j < MainWindow.GAME_MAX_TOP; j += MainWindow.ENTITY_RADIUS*20) {
+        for (int i = MainWindow.GAME_MAX_LEFT + 50 + MainWindow.ENTITY_RADIUS; i < MainWindow.GAME_MAX_RIGHT; i += MainWindow.ENTITY_RADIUS*10) {
+            for (int j = MainWindow.GAME_MAX_BOTTOM + 50 + MainWindow.ENTITY_RADIUS; j < MainWindow.GAME_MAX_TOP; j += MainWindow.ENTITY_RADIUS*10) {
                 pos.set(i, j);
                 Entity e = Math.random() < MainWindow.CHANCE_INITIAL_PREY ? new Prey(pos) : new Predator(pos);
                 pWorld.addEntity(e);
@@ -93,7 +89,7 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyPressed(Input.Keys.A) && cam.position.x > MainWindow.GAME_MAX_LEFT)   { cam.position.x -= CAM_SPEED_FACTOR * delta; }
         
         // Change zoom
-        if (Gdx.input.isKeyPressed(Input.Keys.Q) && cam.zoom < 6) { cam.zoom += CAM_ZOOM_FACTOR * delta; }
+        if (Gdx.input.isKeyPressed(Input.Keys.Q) && cam.zoom < 10) { cam.zoom += CAM_ZOOM_FACTOR * delta; }
         if (Gdx.input.isKeyPressed(Input.Keys.E) && cam.zoom > 1) { cam.zoom -= CAM_ZOOM_FACTOR * delta; }
 
         // Debug
@@ -109,14 +105,9 @@ public class GameScreen implements Screen {
             main.transition.fadeOut(MainWindow.SCREEN.MENU);
         }
 
-        elapsedTime = (TimeUtils.millis() - startTime)/1000; 
+        // To be shown on screen
+        elapsedTime = (MainWindow.getTimeMs() - startTime)/1000;
 
-        if (pWorld.getPredators() > maxPredatorCount) {
-            maxPredatorCount = pWorld.getPredators();
-        }
-        if (pWorld.getPrey() > maxPreyCount) {
-            maxPreyCount = pWorld.getPrey();
-        }
     }
 
     @Override
@@ -142,15 +133,15 @@ public class GameScreen implements Screen {
         main.batch.begin();
         
 
-        // Display all data such as seconds elapsed, the number of prey, max number of prey, etc. 
+        // Display details on screen
         spriteBatch.begin(); 
         font.getData().setScale(2, 2);
         font.setColor(Color.WHITE);
-        font.draw(spriteBatch, "Seconds Elapsed: " + elapsedTime, 10, 784);
-        font.draw(spriteBatch, "Prey Number: " + pWorld.getPrey(), 10, 724);
-        font.draw(spriteBatch, "Predator Number: " + pWorld.getPredators(), 10, 754); 
-        font.draw(spriteBatch, "Max Predators: " + maxPredatorCount, 10, 694); 
-        font.draw(spriteBatch, "Max Prey: " + maxPreyCount, 10, 664); 
+        font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 10, 784);
+        font.draw(spriteBatch, "Seconds Elapsed: " + elapsedTime, 10, 754);
+        font.draw(spriteBatch, "Number Predator: " + pWorld.getPredators() + " / " + MainWindow.MAX_PREDATORS, 10, 724); 
+        font.draw(spriteBatch, "Number Prey: " + pWorld.getPrey() + " / " + MainWindow.MAX_PREY, 10, 694);
+        font.draw(spriteBatch, "Grace Period: " + pWorld.getGraceCount(), 10, 664);
         spriteBatch.end();
 
         // Done drawing

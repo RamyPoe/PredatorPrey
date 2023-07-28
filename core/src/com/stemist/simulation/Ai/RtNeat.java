@@ -6,6 +6,7 @@ public class RtNeat {
     
     // Define inputs and outputs
     private int inputs;
+    private int outputs;
 
     // Input nodes
     private Node[] inputNodes;
@@ -21,6 +22,7 @@ public class RtNeat {
     // Constructor
     public RtNeat(int inputs, int outputs) {
         this.inputs = inputs;
+        this.outputs = outputs;
 
         // Create array lists
         allNodes = new ArrayList<>();
@@ -68,11 +70,16 @@ public class RtNeat {
         // Iterate
         for (int i = 0; i < allNodes.size(); i++) {
             allNodes.get(i).calcVal();
+
+            // If not output node then activate
+            if (i < allNodes.size()-outputs) {
+                // allNodes.get(i).activateSigmabs();
+            }
         }
 
         // Fill output array
         for (int i = 0; i < outputNodes.length; i++) {
-            outputArr[i] = outputNodes[i].activateSigm().getVal();
+            outputArr[i] = outputNodes[i].activateSigmabs().getVal();
         }
         
         // Return output

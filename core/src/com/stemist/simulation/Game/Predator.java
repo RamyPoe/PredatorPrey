@@ -2,7 +2,6 @@ package com.stemist.simulation.Game;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 import com.stemist.simulation.MainWindow;
 import com.stemist.simulation.Physics.Entity;
 import com.stemist.simulation.Physics.PhysicsWorld;
@@ -23,27 +22,26 @@ public class Predator extends Entity {
         this.color = Color.RED;
 
         // Rays for predators
-        rays = new Rays(50, MainWindow.ENTITY_NUM_RAYS, 2500);
+        rays = new Rays(MainWindow.PREDATOR_FOV, MainWindow.ENTITY_NUM_RAYS, MainWindow.PREDATOR_SIGHT_RANGE);
     }
 
     // Check for reproduction
-    public void checkSplit(Array<Entity> e) {
-        if (PhysicsWorld.numPred > MainWindow.MAX_PREDATORS) { return; }
+    public void checkSplit(PhysicsWorld pWorld) {
 
+        // If there is enough split energy
         if (energy > 0 && splitEnergy >= MainWindow.SPLIT_ENERGY_THRESHOLD) {
 
             // Reset split energy
             splitEnergy = 0;
 
             // Split
-            split(e);
+            split(pWorld);
             
         }
     }
 
     // Split
-    public void split(Array<Entity> e) {
-        if (PhysicsWorld.numPred > MainWindow.MAX_PREDATORS) { return; }
+    public void split(PhysicsWorld pWorld) {
 
         // Get spawn pos
         Vector2 newPos = new Vector2(MainWindow.ENTITY_RADIUS, 0);
@@ -51,14 +49,13 @@ public class Predator extends Entity {
         newPos.add(position);
 
         Predator p = new Predator(newPos);
-        e.add(p);
-        PhysicsWorld.numPred++;
+        pWorld.addEntity(p);
 
         // Mutate brain
         p.brain = this.brain.copy().randomMutate();
 
         // Debug
-        System.out.println("NODES: " + (p.brain.numNodes()-p.brain.numInputs()) + "   |   CONNS: " + p.brain.numConnections());
+        // System.out.println("NODES: " + (p.brain.numNodes()-p.brain.numInputs()) + "   |   CONNS: " + p.brain.numConnections());
     }
 
     // Lose energy based on velocity

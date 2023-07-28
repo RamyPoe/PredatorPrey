@@ -3,12 +3,7 @@ package com.stemist.simulation.Configuration;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.stemist.simulation.MainWindow;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 
 
 public class ConfigScreen implements Screen {
@@ -22,7 +17,6 @@ public class ConfigScreen implements Screen {
         BTN_REPRODUCTIVE_DECREASE,
         BTN_SAVE,
         PENDING
-
     }
     private BUTTON btnPressed = BUTTON.BTN_NONE;
 
@@ -38,32 +32,7 @@ public class ConfigScreen implements Screen {
         this.main = main;
 
         // Add hud
-        hud = new ConfigHud(main.batch, reproductiveRate);
-
-        // Add listener for the three buttons on the screen. 
-        hud.reproductiveSpeedIncreaseBtn.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                // Change button pressed
-                if (btnPressed != BUTTON.PENDING) { btnPressed = BUTTON.BTN_REPRODUCTIVE_INCREASE; }
-            }
-        });
-    
-        hud.reproductiveSpeedDecreaseBtn.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                // Change button pressed
-                if (btnPressed != BUTTON.PENDING) { btnPressed = BUTTON.BTN_REPRODUCTIVE_DECREASE; }
-            }
-        });
-    
-        hud.saveBtn.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                // Change button pressed
-                if (btnPressed != BUTTON.PENDING) { btnPressed = BUTTON.BTN_SAVE; }
-            }
-        });
+        hud = new ConfigHud(main.batch);
 
 
     }
@@ -86,35 +55,12 @@ public class ConfigScreen implements Screen {
 
         // Increase/decrease reproductive rate. 
         if (btnPressed == BUTTON.BTN_REPRODUCTIVE_INCREASE) {
-            System.out.println("Increase Reproductive Time");
-            reproductiveRate++; 
-            hud.updateReproductiveRate(reproductiveRate);
             btnPressed = BUTTON.BTN_NONE;
         }
         if (btnPressed == BUTTON.BTN_REPRODUCTIVE_DECREASE) {
-            System.out.println("Decrease Reproductive Time");
-            hud.updateReproductiveRate(reproductiveRate);
-            if (reproductiveRate > 0) {
-                reproductiveRate--;
-            } 
             btnPressed = BUTTON.BTN_NONE; 
         }
 
-        // Save information in a file named reproductiveRate.txt and access it later in Prey.java
-        if (btnPressed == BUTTON.BTN_SAVE) {
-            File file = new File("reproductiveRate.txt"); 
-            try { 
-                FileWriter writer = new FileWriter(file);
-                writer.write(String.valueOf(reproductiveRate));
-                writer.close();
-                System.out.println("Information has been saved"); 
-            }
-            catch (IOException e) {
-                System.out.println(e);
-            }
-
-            btnPressed = BUTTON.BTN_NONE;
-        }
     }
 
     @Override
@@ -134,10 +80,6 @@ public class ConfigScreen implements Screen {
         main.transition.draw();
 
 
-    }
-
-    public int getReproductiveRate() { 
-        return reproductiveRate; 
     }
 
     @Override

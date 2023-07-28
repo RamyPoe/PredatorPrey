@@ -8,7 +8,7 @@ public class Node {
     private ArrayList<Connection> connections;
 
     // Current value
-    private float val;
+    private float val = 0;
 
     // For sorting
     private float xLayer;
@@ -23,7 +23,7 @@ public class Node {
     public void calcVal() {
 
         // Reset val if not input
-        if (connections.size() != 0) { val = 0;}
+        if (connections.size() > 0) { val = 0;}
 
         // Calc new val
         for (Connection c : connections) {
@@ -31,11 +31,30 @@ public class Node {
 
             val += c.getFromNode().getVal() * c.getWeight();
         }
+
+    }
+
+    // Sigmoid approx with absolute
+    public Node activateSigmabs() {
+        val = 2*val / (1 + Math.abs(val));
+        return this;
     }
 
     // Sigmoid activation
-    public Node activateSigm() {
-        val = val / (1 + Math.abs(val));
+    public Node activateSigmoid() {
+        val = 1f / (1f + (float) Math.exp(-val));
+        return this;
+    }
+
+    // Rectified Linear activation
+    public Node activateRelu() {
+        val = val > 0 ? val : 0f;
+        return this;
+    }
+
+    // Leaky Rectified Linear activation
+    public Node activateRelulk() {
+        val = val > 0 ? val : val * 0.02f;
         return this;
     }
 

@@ -67,7 +67,7 @@ public class Entity extends VerletObject {
 
     // Change the angle from percentage of max
     public void changeAngle(float angle, float delta) {
-        this.angle += angle * MainWindow.ENTITY_MAX_ANGLE_VEL * delta;
+        this.angle += angle * delta;
         angle = angle % 360;
     }
 
@@ -77,7 +77,7 @@ public class Entity extends VerletObject {
         // Can't move without energy
         if (energy <= 0) { energy = 0; return; }
 
-        v.set(Math.abs(vel) * MainWindow.ENTITY_MAX_VEL, 0);
+        v.set(Math.abs(vel), 0);
         v.setAngleDeg(angle + (vel < 0 ? 180 : 0));
         setVelocity(v, dt);
     }

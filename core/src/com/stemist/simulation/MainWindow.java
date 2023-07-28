@@ -34,34 +34,41 @@ public class MainWindow extends Game {
 	public static final int V_HEIGHT = 800;
 
 	// Game Constraints
-	public static final int GAME_MAX_RIGHT 	=  2000;
-	public static final int GAME_MAX_LEFT 	= -2000;
-	public static final int GAME_MAX_TOP 	=  1400;
-	public static final int GAME_MAX_BOTTOM = -1400;
+	public static final int GAME_MAX_RIGHT 	=  2200;
+	public static final int GAME_MAX_LEFT 	= -2200;
+	public static final int GAME_MAX_TOP 	=  1800;
+	public static final int GAME_MAX_BOTTOM = -1800;
 
 	// Game constants
-	public static final int ENTITY_RADIUS = 30;
+	public static final int ENTITY_RADIUS = 40;
 	public static final int ENTITY_MAX_VEL = 700;
 	public static final int ENTITY_MAX_ANGLE_VEL = 500;
 	public static final int ENTITY_MAX_ENERGY = 100;
-	public static final float VEL_ENERGY_DEPLETION = 20;
-	public static final int ENTITY_NUM_RAYS = 20;
-	public static final float CHANCE_INITIAL_PREY = 0.7f;
-
-	public static final int MAX_PREDATORS = 25;
-	public static final int MAX_PREY = 200;
+	public static final float VEL_ENERGY_DEPLETION = 2;
+	public static final int ENTITY_NUM_RAYS = 13;
+	public static final int PREADTOR_GRACE_PERIOD = 500;
+	
+	// Spawning
+	public static final float CHANCE_INITIAL_PREY = 0.8f;
+	public static final int MAX_PREDATORS = 75;
+	public static final int MAX_PREY = 300;
 
 	// Predator
-	public static final float IDLE_ENERGY_DEPLETION = 3;
-	public static final float KILL_ENERGY_GAIN = 20;
+	public static final float IDLE_ENERGY_DEPLETION = 18;
+	public static final float KILL_ENERGY_GAIN = 40;
 	public static final float KILL_SPLIT_GAIN = 50;
 	public static final float SPLIT_ENERGY_THRESHOLD = 100;
 	public static final float SPLIT_ENERGY_DEPLETION = 2;
 	public static final int DIGESTION_TIME_MS = 500;
-
+	public static final int PREDATOR_FOV = 50;
+	public static final int PREDATOR_SIGHT_RANGE = 1600;
+	
+	
 	// Prey
 	public static final float IDLE_ENERGY_GAIN = 4;
-	public static final int SPLIT_TIME_MS = 3000;
+	public static final int SPLIT_TIME_MS = 4000;
+	public static final int PREY_FOV = 270;
+	public static final int PREY_SIGHT_RANGE = 800;
 
 	
 	// Called when class is first created
