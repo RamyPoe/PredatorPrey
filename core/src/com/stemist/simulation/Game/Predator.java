@@ -9,7 +9,7 @@ import com.stemist.simulation.Physics.Rays;
 public class Predator extends Entity {
  
     // Digestion timer
-    private long digestTimer;
+    private float digestTimer;
 
     // Split energy
     private float splitEnergy = 0;
@@ -64,6 +64,7 @@ public class Predator extends Entity {
         energy -= MainWindow.IDLE_ENERGY_DEPLETION * dt + getVelMagnitude(dt)/MainWindow.ENTITY_MAX_VEL * MainWindow.VEL_ENERGY_DEPLETION * dt;
         splitEnergy -= MainWindow.SPLIT_ENERGY_DEPLETION * dt;
         if (splitEnergy < 0) { splitEnergy = 0; }
+        digestTimer -= dt*1000f;
     }
 
     // When making kill
@@ -78,12 +79,12 @@ public class Predator extends Entity {
 
     // Check if still digesting
     public boolean digesting() {
-        return MainWindow.getTimeMs()-digestTimer < MainWindow.DIGESTION_TIME_MS;
+        return digestTimer > 0;
     }
 
     // Reset digestion
     public void startDigesting() {
-        digestTimer = MainWindow.getTimeMs();
+        digestTimer = MainWindow.DIGESTION_TIME_MS;
     }
 
 }

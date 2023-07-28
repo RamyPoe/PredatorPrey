@@ -70,8 +70,6 @@ public class Rays {
     // https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
     private float checkRayHit(Ray r, Entity e) {
 
-    
-        
         // Quadratic formula setup
         float a = (float) Math.pow(r.end.x-r.origin.x, 2) + (float) Math.pow(r.end.y-r.origin.y, 2);
         float b = 2 * (r.end.x-r.origin.x) * (r.origin.x-e.getX()) + 2 * (r.end.y-r.origin.y) * (r.origin.y-e.getY());
@@ -100,6 +98,7 @@ public class Rays {
 
 
 }
+
 
 // Ray Struct
 class Ray {

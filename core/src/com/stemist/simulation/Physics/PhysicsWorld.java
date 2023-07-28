@@ -53,9 +53,9 @@ public class PhysicsWorld {
     public void update(float dt) {
 
         checkEntities(dt);
-        applyConstraint();
         updateObjects(dt);
-
+        applyConstraint();
+        
     }
 
     // Checks and mitigates entity overlapping as well as calculating ray distances
@@ -70,10 +70,17 @@ public class PhysicsWorld {
             // Get entity
             Entity e = entities.get(i);
 
-            // Prepare neural net input with bias neuron
+            // Prepare raycast inputs
+            // https://www.desmos.com/calculator/tam8eh34fe
             for (int j = 0; j < MainWindow.ENTITY_NUM_RAYS; j++) {
-                netIn[j] = 1f - e.getRays().getRayCollisions(j);
+                netIn[j] = 1 - e.getRays().getRayCollisions(j);
+
+                // netIn[j] = (netIn[j]) > 0.01f ? 1f : 0f;
+                // netIn[j] = (float) Math.pow(netIn[j], 1f/2f);
+                netIn[j] = (float) Math.pow(netIn[j], 1f/3f);
             }
+
+            // Bias neuron
             netIn[netIn.length-1] = 1f;
 
             // Get output
@@ -85,19 +92,16 @@ public class PhysicsWorld {
             // Reset rays
             e.getRays().resetRays();
 
+            // Change energy
+            e.changeEnergy(dt);
             
             // If predator loses energy it dies
             if (e instanceof Predator) {
 
-                // Predator can't move backward
-                e.setVelocity((netOut[1] > 0 ? netOut[1] : netOut[1]*0.2f) * MainWindow.ENTITY_MAX_VEL, dt);
+                // Predators are discouraged from moving backward
+                e.setVelocity((netOut[1] > 0 ? netOut[1]*0.8f : netOut[1]*0.2f) * MainWindow.ENTITY_MAX_VEL, dt);
 
-                // Predators can start dying now
-                e.changeEnergy(dt);
-                // if (gracePeriod <= 0) {
-                    // e.changeEnergy(dt);
-                // }
-
+                // Predators can die
                 if (e.getEnergy() <= 0) {
                     entities.removeIndex(i);
                     numPred--;
@@ -107,16 +111,11 @@ public class PhysicsWorld {
 
             // If entity is a prey
             else {
-
                 // Neural network output with deadzone
-                // e.setVelocity((Math.abs(netOut[1]) < 0.1 ? 0f : netOut[0]) * MainWindow.ENTITY_MAX_VEL, dt);
                 e.setVelocity(netOut[1] * MainWindow.ENTITY_MAX_VEL, dt);
 
                 // Check for split
                 ((Prey) e).checkSplit(this);
-
-                // Change energy
-                e.changeEnergy(dt);
             }
 
             // Get next index
@@ -162,11 +161,15 @@ public class PhysicsWorld {
 
                 // Check ray collisions if applicable
                 if ((e1 instanceof Predator && e2 instanceof Prey) || (e1 instanceof Prey && e2 instanceof Predator)) {
-                    e1Rays.checkRaysHits(e1, e2);
-                    e2Rays.checkRaysHits(e2, e1);
+
+                    // If close enough
+                    if (dist < Math.max(MainWindow.PREDATOR_SIGHT_RANGE, MainWindow.PREY_SIGHT_RANGE)) {
+                        e1Rays.checkRaysHits(e1, e2);
+                        e2Rays.checkRaysHits(e2, e1);
+                    }
                 }
 
-                // Ignore if not touching
+                // Skip rest if not touching
                 if (dist > minDist) { j++; continue; }
 
                 // If predator touches prey
@@ -226,6 +229,7 @@ public class PhysicsWorld {
             if (incr_i) i++;
 
         }
+
     }
 
     // Update the physics model for each entity

@@ -45,7 +45,7 @@ public class MainWindow extends Game {
 	public static final int ENTITY_MAX_ANGLE_VEL = 500;
 	public static final int ENTITY_MAX_ENERGY = 100;
 	public static final float VEL_ENERGY_DEPLETION = 2;
-	public static final int ENTITY_NUM_RAYS = 13;
+	public static final int ENTITY_NUM_RAYS = 5;
 	public static final int PREADTOR_GRACE_PERIOD = 500;
 	
 	// Spawning
@@ -61,13 +61,13 @@ public class MainWindow extends Game {
 	public static final float SPLIT_ENERGY_DEPLETION = 2;
 	public static final int DIGESTION_TIME_MS = 500;
 	public static final int PREDATOR_FOV = 50;
-	public static final int PREDATOR_SIGHT_RANGE = 1600;
+	public static final int PREDATOR_SIGHT_RANGE = 2500;
 	
 	
 	// Prey
 	public static final float IDLE_ENERGY_GAIN = 4;
 	public static final int SPLIT_TIME_MS = 4000;
-	public static final int PREY_FOV = 270;
+	public static final int PREY_FOV = 120;
 	public static final int PREY_SIGHT_RANGE = 800;
 
 	
@@ -134,8 +134,8 @@ public class MainWindow extends Game {
 	}
 
 	// Get current time
-	public static long getTimeMs() {
-		return System.nanoTime() / 1_000_000;
+	public static double getTimeMs() {
+		return System.nanoTime() / 1_000_000d;
 	}
 
 	// When screen is destroyed (used for garbage collection)

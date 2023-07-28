@@ -9,7 +9,7 @@ import com.stemist.simulation.Physics.Rays;
 public class Prey extends Entity {
     
     // Split timer
-    private long splitTimer;
+    private float splitTimer;
 
     // Inherit position and radius 
     public Prey(Vector2 position) {
@@ -22,17 +22,17 @@ public class Prey extends Entity {
         rays = new Rays(MainWindow.PREY_FOV, MainWindow.ENTITY_NUM_RAYS, MainWindow.PREY_SIGHT_RANGE);
 
         // Random offset to timer
-        splitTimer = MainWindow.getTimeMs() + (long) (Math.random() * 100);
+        splitTimer = MainWindow.SPLIT_TIME_MS + (int) (Math.random() * 200f);
     }
 
     // Check for reproduction
     public void checkSplit(PhysicsWorld pWorld) {
         
         // Based on the number provided this will be the denominator of split time. If the reproductive rate is higher (i.e. 2x) then it will take half as long to reproduce. 
-        if (energy > 0 && MainWindow.getTimeMs()-splitTimer > MainWindow.SPLIT_TIME_MS) {
+        if (energy > 0 && splitTimer < 0) {
 
             // Reset split timer
-            splitTimer = MainWindow.getTimeMs();
+            splitTimer = MainWindow.SPLIT_TIME_MS;
 
             Vector2 newPos = new Vector2(MainWindow.ENTITY_RADIUS, 0);
             newPos.setAngleDeg((float) Math.random()*360f);
@@ -52,6 +52,7 @@ public class Prey extends Entity {
         float vel = getVelMagnitude(dt);
         if (vel == 0) { energy += MainWindow.IDLE_ENERGY_GAIN * dt; }
         else { energy -= getVelMagnitude(dt)/MainWindow.ENTITY_MAX_VEL * MainWindow.VEL_ENERGY_DEPLETION * dt; }
+        splitTimer -= dt*1000f;
     }
 
 

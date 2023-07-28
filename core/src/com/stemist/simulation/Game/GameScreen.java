@@ -19,7 +19,7 @@ import com.stemist.simulation.Physics.PhysicsRenderer;
 public class GameScreen implements Screen {
 
     // Timer 
-    private long startTime = MainWindow.getTimeMs();
+    private long timeElapsed = 0;
     private float lastDeltaFrameTime = 0;
 
     // To change screens
@@ -37,6 +37,8 @@ public class GameScreen implements Screen {
     // Game world
     private PhysicsWorld pWorld;
     private PhysicsRenderer pRenderer;
+
+    Prey player;
 
     
     // Constructor
@@ -71,6 +73,13 @@ public class GameScreen implements Screen {
             }
         }
 
+        // pWorld.addEntity(new Prey(new Vector2(0, 0)));
+        // pWorld.getEntities().get(0).brainEnabled = false;
+        // 
+        // player = new Prey(new Vector2(100, 100));
+        // player.brainEnabled = false;
+        // pWorld.addEntity(player);
+
     }
 
     @Override
@@ -89,14 +98,17 @@ public class GameScreen implements Screen {
         // Change zoom
         if (Gdx.input.isKeyPressed(Input.Keys.Q) && cam.zoom < 10) { cam.zoom += CAM_ZOOM_FACTOR * delta; }
         if (Gdx.input.isKeyPressed(Input.Keys.E) && cam.zoom > 1) { cam.zoom -= CAM_ZOOM_FACTOR * delta; }
+        
+        // Debug (Move player)
+        // if (Gdx.input.isKeyPressed(Input.Keys.UP)) { player.setVelocity(MainWindow.ENTITY_MAX_VEL, delta); }
+        // else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) { player.setVelocity(-MainWindow.ENTITY_MAX_VEL, delta); }
+        // else { player.setVelocity(0, delta); }
+        // if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) { player.changeAngle(-MainWindow.ENTITY_MAX_ANGLE_VEL, delta); }
+        // if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) { player.changeAngle(MainWindow.ENTITY_MAX_ANGLE_VEL, delta); }
 
-        // Debug
-        // System.out.println("PREY: " + PhysicsWorld.numPrey + "  |  PRED: " + PhysicsWorld.numPred);
 
         // Skip button check if transitioning
-        if (main.transition.active) {
-            return;
-        }
+        if (main.transition.active) { return; }
 
         // Check click to leave
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
@@ -110,6 +122,7 @@ public class GameScreen implements Screen {
         // Seperate logic from rendering
         update(delta);
         lastDeltaFrameTime = delta;
+        timeElapsed += delta*1000f;
 
         // Physics
         pWorld.update(delta);
@@ -146,7 +159,7 @@ public class GameScreen implements Screen {
     }
 
     // Used for HUD
-    public float getTimeElapsed() { return (MainWindow.getTimeMs()-startTime)/1000f; }
+    public float getTimeElapsed() { return timeElapsed/1000f; }
     public int getFps() { return Gdx.graphics.getFramesPerSecond(); }
     public float getFrameTime() { return lastDeltaFrameTime; }
     public int getNumPrey() { return pWorld.getNumPrey(); }

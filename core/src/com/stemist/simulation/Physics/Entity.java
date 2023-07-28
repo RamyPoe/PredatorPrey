@@ -27,7 +27,7 @@ public class Entity extends VerletObject {
 
     // Neural Network
     protected RtNeat brain;
-    
+    public boolean brainEnabled = true;
 
     // Constructor
     public Entity(Vector2 position) {
