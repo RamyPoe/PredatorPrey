@@ -5,43 +5,38 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.stemist.simulation.MainWindow;
 import com.stemist.simulation.Physics.Entity;
 import com.stemist.simulation.Physics.PhysicsWorld;
 import com.stemist.simulation.Physics.PhysicsRenderer;
-import com.badlogic.gdx.graphics.Color;
  
  
-
 
 public class GameScreen implements Screen {
 
     // Timer 
     private long startTime = MainWindow.getTimeMs();
-    private float elapsedTime;
+    private float lastDeltaFrameTime = 0;
 
-    // Used for text display 
-    private SpriteBatch spriteBatch = new SpriteBatch(); 
-    private BitmapFont font = new BitmapFont(); 
- 
     // To change screens
-    MainWindow main;
+    private MainWindow main;
 
-    // For prespective
+    // For game prespective
     private OrthographicCamera cam;
     private Viewport viewport;
     public static final float CAM_SPEED_FACTOR = 1200f;
     public static final float CAM_ZOOM_FACTOR = 13f;
 
+    // Game hud
+    private GameHud hud;
+
     // Game world
-    PhysicsWorld pWorld;
-    PhysicsRenderer pRenderer;
+    private PhysicsWorld pWorld;
+    private PhysicsRenderer pRenderer;
 
     
     // Constructor
@@ -50,11 +45,14 @@ public class GameScreen implements Screen {
         // For changing screens
         this.main = main;
 
-        // For prespective
-        cam = new OrthographicCamera();
-        cam.zoom = 1.0f;
-        viewport = new FitViewport(MainWindow.V_WIDTH, MainWindow.V_HEIGHT, cam);
+        // Create hud
+        hud = new GameHud(main.batch, this);
 
+        // For game prespective
+        cam = new OrthographicCamera();
+        cam.zoom = 1f;
+        viewport = new ExtendViewport(MainWindow.V_WIDTH, MainWindow.V_HEIGHT, cam);
+        
         // Start in middle of world
         cam.position.x = (MainWindow.GAME_MAX_LEFT+MainWindow.GAME_MAX_RIGHT)/2;
         cam.position.y = (MainWindow.GAME_MAX_BOTTOM+MainWindow.GAME_MAX_TOP)/2;
@@ -105,15 +103,13 @@ public class GameScreen implements Screen {
             main.transition.fadeOut(MainWindow.SCREEN.MENU);
         }
 
-        // To be shown on screen
-        elapsedTime = (MainWindow.getTimeMs() - startTime)/1000;
-
     }
 
     @Override
     public void render(float delta) {
         // Seperate logic from rendering
         update(delta);
+        lastDeltaFrameTime = delta;
 
         // Physics
         pWorld.update(delta);
@@ -123,44 +119,42 @@ public class GameScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // Camera
+        viewport.apply(false);
         cam.update();
         main.batch.setProjectionMatrix(cam.combined);
         pRenderer.getShapeRenderer().setProjectionMatrix(cam.combined);
-
-        pRenderer.render(pWorld);
-
-        // Prepare to draw
-        main.batch.begin();
         
-
-        // Display details on screen
-        spriteBatch.begin(); 
-        font.getData().setScale(2, 2);
-        font.setColor(Color.WHITE);
-        font.draw(spriteBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), 10, 784);
-        font.draw(spriteBatch, "Seconds Elapsed: " + elapsedTime, 10, 754);
-        font.draw(spriteBatch, "Number Predator: " + pWorld.getPredators() + " / " + MainWindow.MAX_PREDATORS, 10, 724); 
-        font.draw(spriteBatch, "Number Prey: " + pWorld.getPrey() + " / " + MainWindow.MAX_PREY, 10, 694);
-        font.draw(spriteBatch, "Grace Period: " + pWorld.getGraceCount(), 10, 664);
-        spriteBatch.end();
-
-        // Done drawing
-        main.batch.end();
-
+        // Render game
+        pRenderer.render(pWorld);
+        
+        // Show hud
+        hud.draw(delta);
 
         // Transition screen fade in
         if (!main.transition.haveFadedIn && !main.transition.active)
             main.transition.fadeIn();
         
         // Draw transition
-        main.transition.draw();
+        main.transition.draw(delta);
 
     }
 
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height);
+        hud.stage.getViewport().update(width, height);
     }
+
+    // Used for HUD
+    public float getTimeElapsed() { return (MainWindow.getTimeMs()-startTime)/1000f; }
+    public int getFps() { return Gdx.graphics.getFramesPerSecond(); }
+    public float getFrameTime() { return lastDeltaFrameTime; }
+    public int getNumPrey() { return pWorld.getNumPrey(); }
+    public int getNumPred() { return pWorld.getNumPredators(); }
+    public int getGracePeriod() { return pWorld.getGraceCount(); }
+
+
+
 
     @Override
     public void pause() {
@@ -176,7 +170,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-        
+        hud.dispose();
     }
     
 }
