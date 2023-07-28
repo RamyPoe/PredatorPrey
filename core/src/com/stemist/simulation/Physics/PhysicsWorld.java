@@ -87,7 +87,8 @@ public class PhysicsWorld {
             netOut = e.brain.forward(netIn);
 
             // Apply output
-            e.changeAngle(netOut[0] * MainWindow.ENTITY_MAX_ANGLE_VEL, dt);
+            if (e.brainEnabled)
+                e.changeAngle(netOut[0] * MainWindow.ENTITY_MAX_ANGLE_VEL, dt);
 
             // Reset rays
             e.getRays().resetRays();
@@ -99,7 +100,8 @@ public class PhysicsWorld {
             if (e instanceof Predator) {
 
                 // Predators are discouraged from moving backward
-                e.setVelocity((netOut[1] > 0 ? netOut[1]*0.8f : netOut[1]*0.2f) * MainWindow.ENTITY_MAX_VEL, dt);
+                if (e.brainEnabled)
+                    e.setVelocity((netOut[1] > 0 ? netOut[1]*0.8f : netOut[1]*0.2f) * MainWindow.ENTITY_MAX_VEL, dt);
 
                 // Predators can die
                 if (e.getEnergy() <= 0) {
@@ -112,7 +114,8 @@ public class PhysicsWorld {
             // If entity is a prey
             else {
                 // Neural network output with deadzone
-                e.setVelocity(netOut[1] * MainWindow.ENTITY_MAX_VEL, dt);
+                if (e.brainEnabled)
+                    e.setVelocity(netOut[1] * MainWindow.ENTITY_MAX_VEL, dt);
 
                 // Check for split
                 ((Prey) e).checkSplit(this);

@@ -27,26 +27,27 @@ public class Predator extends Entity {
 
     // Check for reproduction
     public void checkSplit(PhysicsWorld pWorld) {
-
+        
         // If there is enough split energy
         if (energy > 0 && splitEnergy >= MainWindow.SPLIT_ENERGY_THRESHOLD) {
-
-            // Reset split energy
-            splitEnergy = 0;
-
+            
             // Split
             split(pWorld);
             
         }
     }
-
+    
     // Split
     public void split(PhysicsWorld pWorld) {
+        if (!brainEnabled) { return; }
 
         // Get spawn pos
         Vector2 newPos = new Vector2(MainWindow.ENTITY_RADIUS, 0);
         newPos.setAngleDeg((float) Math.random()*360f);
         newPos.add(position);
+
+        // Reset split energy
+        splitEnergy = 0;
 
         Predator p = new Predator(newPos);
         pWorld.addEntity(p);

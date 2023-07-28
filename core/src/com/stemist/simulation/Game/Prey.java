@@ -27,6 +27,7 @@ public class Prey extends Entity {
 
     // Check for reproduction
     public void checkSplit(PhysicsWorld pWorld) {
+        if (!brainEnabled) { return; }
         
         // Based on the number provided this will be the denominator of split time. If the reproductive rate is higher (i.e. 2x) then it will take half as long to reproduce. 
         if (energy > 0 && splitTimer < 0) {

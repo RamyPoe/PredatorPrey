@@ -38,7 +38,7 @@ public class GameScreen implements Screen {
     private PhysicsWorld pWorld;
     private PhysicsRenderer pRenderer;
 
-    Prey player;
+    Entity player;
 
     
     // Constructor
@@ -62,6 +62,11 @@ public class GameScreen implements Screen {
         // Create game world
         pWorld = new PhysicsWorld();
         pRenderer = new PhysicsRenderer(new ShapeRenderer());
+
+        // Player
+        player = new Prey(new Vector2(0, 0));
+        player.brainEnabled = false;
+        pWorld.addEntity(player);
 
         // Spawn inital
         Vector2 pos = new Vector2(0, 0);
@@ -100,11 +105,11 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyPressed(Input.Keys.E) && cam.zoom > 1) { cam.zoom -= CAM_ZOOM_FACTOR * delta; }
         
         // Debug (Move player)
-        // if (Gdx.input.isKeyPressed(Input.Keys.UP)) { player.setVelocity(MainWindow.ENTITY_MAX_VEL, delta); }
-        // else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) { player.setVelocity(-MainWindow.ENTITY_MAX_VEL, delta); }
-        // else { player.setVelocity(0, delta); }
-        // if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) { player.changeAngle(-MainWindow.ENTITY_MAX_ANGLE_VEL, delta); }
-        // if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) { player.changeAngle(MainWindow.ENTITY_MAX_ANGLE_VEL, delta); }
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) { player.setVelocity(MainWindow.ENTITY_MAX_VEL, delta); }
+        else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) { player.setVelocity(-MainWindow.ENTITY_MAX_VEL, delta); }
+        else { player.setVelocity(0, delta); }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) { player.changeAngle(-MainWindow.ENTITY_MAX_ANGLE_VEL, delta); }
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) { player.changeAngle(MainWindow.ENTITY_MAX_ANGLE_VEL, delta); }
 
 
         // Skip button check if transitioning
