@@ -237,11 +237,11 @@ public class PhysicsWorld {
 
     }
 
-    public int getPredators() { 
+    public int getNumPredators() { 
         return numPred;
     }
 
-    public int getPrey() { 
+    public int getNumPrey() { 
         return numPrey;
     }
 

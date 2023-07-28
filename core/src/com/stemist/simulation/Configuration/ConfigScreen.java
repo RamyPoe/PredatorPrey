@@ -34,7 +34,6 @@ public class ConfigScreen implements Screen {
         // Add hud
         hud = new ConfigHud(main.batch);
 
-
     }
 
     @Override
@@ -77,7 +76,7 @@ public class ConfigScreen implements Screen {
             main.transition.fadeIn();
         
         // Draw transition
-        main.transition.draw();
+        main.transition.draw(delta);
 
 
     }

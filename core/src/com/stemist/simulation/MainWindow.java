@@ -81,7 +81,7 @@ public class MainWindow extends Game {
 		Gdx.graphics.setWindowedMode(1200, 800);
 
 		// Setup transition
-		transition = new Transition(60);
+		transition = new Transition(4f);
 		transition.setGame(this);
 
 		// Start with menu
@@ -94,7 +94,7 @@ public class MainWindow extends Game {
 	@Override
 	public void render () {
 		// Clear screen
-		ScreenUtils.clear(1, 0, 0, 1);
+		ScreenUtils.clear(0, 0, 0, 1);
 
 		// See if screen needs to be changed
 		if (cur_screen != new_screen) {

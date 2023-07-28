@@ -89,7 +89,7 @@ public class MenuScreen implements Screen {
             main.transition.fadeIn();
         
         // Draw transition
-        main.transition.draw();
+        main.transition.draw(delta);
 
 
     }

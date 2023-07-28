@@ -10,8 +10,10 @@ public class DesktopLauncher {
 		// Config object
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 
-		// Set fps
-		config.setForegroundFPS(60);
+		// Unlock
+		config.useVsync(false);
+		config.setForegroundFPS(0);
+		config.setIdleFPS(0);
 
 		// Set window title
 		config.setTitle("Simulation");

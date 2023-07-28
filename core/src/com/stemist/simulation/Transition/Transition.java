@@ -34,7 +34,7 @@ public class Transition {
     public Transition(float speed) {
 
         // Speed of transition
-        this.speed = speed/1000.0f;
+        this.speed = speed;
 
         // Camera for drawing
         cam = new OrthographicCamera();
@@ -79,13 +79,13 @@ public class Transition {
     }
 
     // Draw at correct position
-    public void draw() {
+    public void draw(float delta) {
 
         // Don't draw if we're not in use
         if (!active) { return; }
 
         // Increment till done
-        pos += speed;
+        pos += speed * delta;
         if (pos > 1) { pos = 1; }
 
         // Move black screen out if fading out
