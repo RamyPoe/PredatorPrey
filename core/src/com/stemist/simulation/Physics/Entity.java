@@ -12,6 +12,7 @@ public class Entity extends VerletObject {
 
     // For drawing and collisions
     private float radius;
+    private float radiusSqrd;
 
     // Can only apply velocity on this axis
     private float angle;
@@ -38,6 +39,7 @@ public class Entity extends VerletObject {
 
         // Set radius
         this.radius = MainWindow.ENTITY_RADIUS;
+        this.radiusSqrd = this.radius * this.radius;
 
         // Face random direction
         angle = (float) Math.random()*360f;
@@ -50,20 +52,15 @@ public class Entity extends VerletObject {
         
     }
 
-    // Get the rays instance
-    public Rays getRays() {
-        return rays;
-    }    
-    
-    // Setting angle
-    public void setAngle(float angle) {
-        this.angle = angle;
-    }
+    // Get this entites gen
+    public int getGeneration() { return brain.getGeneration(); }
 
-    // Getting current angle
-    public float getAngle() {
-        return angle;
-    }
+    // Get the rays instance
+    public Rays getRays() { return rays; }    
+    
+    // Changing angle
+    public void setAngle(float angle) { this.angle = angle; }
+    public float getAngle() { return angle; }
 
     // Change the angle from percentage of max
     public void changeAngle(float angle, float delta) {
@@ -94,6 +91,7 @@ public class Entity extends VerletObject {
 
     // Get radius
     public float getRadius() { return radius; }
+    public float getRadiusSqrd() { return radiusSqrd; }
 
     // Get current energy
     public float getEnergy() { return energy; }

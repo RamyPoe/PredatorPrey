@@ -71,9 +71,14 @@ public class Rays {
     private float checkRayHit(Ray r, Entity e) {
 
         // Quadratic formula setup
-        float a = (float) Math.pow(r.end.x-r.origin.x, 2) + (float) Math.pow(r.end.y-r.origin.y, 2);
-        float b = 2 * (r.end.x-r.origin.x) * (r.origin.x-e.getX()) + 2 * (r.end.y-r.origin.y) * (r.origin.y-e.getY());
-        float c = (float) Math.pow(r.origin.x-e.getX(), 2) + (float) Math.pow(r.origin.y-e.getY(), 2) - (e.getRadius()*e.getRadius());
+        float dx1 = r.end.x-r.origin.x;
+        float dx2 = r.origin.x-e.getX();
+        float dy1 = r.end.y-r.origin.y;
+        float dy2 = r.origin.y-e.getY();
+
+        float a = (float) Math.pow(dx1, 2) + (float) Math.pow(dy1, 2);
+        float b = 2 * (dx1) * (dx2) + 2 * (dy1) * (dy2);
+        float c = (float) Math.pow(dx2, 2) + (float) Math.pow(dy2, 2) - (e.getRadiusSqrd());
 
         // Apply discriminant
         float t = (b*b) - 4*a*c;

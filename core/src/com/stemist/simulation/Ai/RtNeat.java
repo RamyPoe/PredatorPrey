@@ -4,6 +4,10 @@ import java.util.*;
 
 public class RtNeat {
     
+    // Keep track when created
+    private static int maxGen = 1;
+    private int generation;
+
     // Define inputs and outputs
     private int inputs;
     private int outputs;
@@ -19,10 +23,18 @@ public class RtNeat {
     private ArrayList<Node> allNodes;
     private ArrayList<Connection> allConnections;
 
-    // Constructor
+    // Constructors
+    public RtNeat(int inputs, int outputs, int gen) {
+        this(inputs, outputs);
+        this.generation = gen;
+        maxGen = gen > maxGen ? gen : maxGen;
+    }
     public RtNeat(int inputs, int outputs) {
         this.inputs = inputs;
         this.outputs = outputs;
+
+        // Initial gen
+        generation = 1;
 
         // Create array lists
         allNodes = new ArrayList<>();
@@ -200,11 +212,15 @@ public class RtNeat {
     // Number of connections
     public int numConnections() { return allConnections.size(); }
 
+    // Change generation
+    public int getGeneration() { return generation; }
+    public static int getMaxGeneration() { return maxGen; }
+
     // Return copy for child
     public RtNeat copy() {
 
         // Copy instance to be filled
-        RtNeat cpy = new RtNeat(this.inputs, this.outputArr.length);
+        RtNeat cpy = new RtNeat(this.inputs, this.outputs, this.getGeneration()+1);
 
         // Clear the array
         cpy.allNodes.clear();

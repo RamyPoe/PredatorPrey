@@ -84,7 +84,7 @@ public class Predator extends Entity {
     }
 
     // Reset digestion
-    public void startDigesting() {
+    private void startDigesting() {
         digestTimer = MainWindow.DIGESTION_TIME_MS;
     }
 
