@@ -26,25 +26,28 @@ public class Prey extends Entity {
     }
 
     // Check for reproduction
-    public void checkSplit(PhysicsWorld pWorld) {
-        if (!brainEnabled) { return; }
+    public boolean checkSplit() {
+        if (!brainEnabled) { return false; }
+        return (energy > 0 && splitTimer < 0);
+    }
+
+    // Returns child
+    public Prey split() {
+
+        // Reset timer
+        splitTimer = MainWindow.SPLIT_TIME_MS;
+
+        // Spawn at random offset from parent
+        Vector2 newPos = new Vector2(MainWindow.ENTITY_RADIUS, 0);
+        newPos.setAngleDeg((float) Math.random()*360f);
+        newPos.add(position);
         
-        // Based on the number provided this will be the denominator of split time. If the reproductive rate is higher (i.e. 2x) then it will take half as long to reproduce. 
-        if (energy > 0 && splitTimer < 0) {
+        // Mutate brain
+        Prey p = new Prey(newPos);
+        p.brain = this.brain.copy().randomMutate();
 
-            // Reset split timer
-            splitTimer = MainWindow.SPLIT_TIME_MS;
-
-            Vector2 newPos = new Vector2(MainWindow.ENTITY_RADIUS, 0);
-            newPos.setAngleDeg((float) Math.random()*360f);
-            newPos.add(position);
-
-            Prey p = new Prey(newPos);
-            pWorld.addEntity(p);
-
-            // Mutate brain
-            p.brain = this.brain.copy().randomMutate();
-        }
+        // Return new entity
+        return p;
     }
 
     // Lose energy based on velocity or gain when still

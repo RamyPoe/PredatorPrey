@@ -55,6 +55,9 @@ public class Entity extends VerletObject {
     // Get this entites gen
     public int getGeneration() { return brain.getGeneration(); }
 
+    // Get neural net output
+    public float[] brainForward(float[] inputs) { return brain.forward(inputs); }
+
     // Get the rays instance
     public Rays getRays() { return rays; }    
     

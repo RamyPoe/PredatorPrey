@@ -23,40 +23,34 @@ public class Predator extends Entity {
 
         // Rays for predators
         rays = new Rays(MainWindow.PREDATOR_FOV, MainWindow.ENTITY_NUM_RAYS, MainWindow.PREDATOR_SIGHT_RANGE);
+
+        // Initial timer
+        startDigesting();
     }
 
     // Check for reproduction
-    public void checkSplit(PhysicsWorld pWorld) {
-        
-        // If there is enough split energy
-        if (energy > 0 && splitEnergy >= MainWindow.SPLIT_ENERGY_THRESHOLD) {
-            
-            // Split
-            split(pWorld);
-            
-        }
+    public boolean checkSplit() {
+        if (!brainEnabled) { return false; }
+        return (energy > 0 && splitEnergy >= MainWindow.SPLIT_ENERGY_THRESHOLD);
     }
     
-    // Split
-    public void split(PhysicsWorld pWorld) {
-        if (!brainEnabled) { return; }
+    // Returns child
+    public Predator split() {
 
+        // Reset split energy
+        splitEnergy = 0;
+        
         // Get spawn pos
         Vector2 newPos = new Vector2(MainWindow.ENTITY_RADIUS, 0);
         newPos.setAngleDeg((float) Math.random()*360f);
         newPos.add(position);
 
-        // Reset split energy
-        splitEnergy = 0;
-
-        Predator p = new Predator(newPos);
-        pWorld.addEntity(p);
-
         // Mutate brain
+        Predator p = new Predator(newPos);
         p.brain = this.brain.copy().randomMutate();
-
-        // Debug
-        // System.out.println("NODES: " + (p.brain.numNodes()-p.brain.numInputs()) + "   |   CONNS: " + p.brain.numConnections());
+        
+        // Return Predator
+        return p;
     }
 
     // Lose energy based on velocity
@@ -70,8 +64,6 @@ public class Predator extends Entity {
 
     // When making kill
     public void madeKill() {
-        if (digesting()) { return; }
-
         energy += MainWindow.KILL_ENERGY_GAIN;
         energy = Math.min(energy, MainWindow.ENTITY_MAX_ENERGY);
         splitEnergy += MainWindow.KILL_SPLIT_GAIN;

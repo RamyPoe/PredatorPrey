@@ -34,7 +34,8 @@ public class GameScreen implements Screen {
     // Game hud
     private GameHud hud;
 
-    // Game world
+    // Entity world
+    private GameWorld gameWorld;
     private PhysicsWorld pWorld;
     private PhysicsRenderer pRenderer;
 
@@ -60,7 +61,14 @@ public class GameScreen implements Screen {
         cam.position.y = (MainWindow.GAME_MAX_BOTTOM+MainWindow.GAME_MAX_TOP)/2;
 
         // Create game world
-        pWorld = new PhysicsWorld();
+        gameWorld = new GameWorld();
+        pWorld = new PhysicsWorld(gameWorld);
+        gameWorld.setPhysicsWorld(pWorld);
+
+        // Spawn intial entities to world
+        gameWorld.spawnInitial();
+
+        // To render world
         pRenderer = new PhysicsRenderer(new ShapeRenderer());
 
         // Player
@@ -68,15 +76,6 @@ public class GameScreen implements Screen {
         player.brainEnabled = false;
         pWorld.addEntity(player);
 
-        // Spawn inital
-        Vector2 pos = new Vector2(0, 0);
-        for (int i = MainWindow.GAME_MAX_LEFT + 50 + MainWindow.ENTITY_RADIUS; i < MainWindow.GAME_MAX_RIGHT; i += MainWindow.ENTITY_RADIUS*10) {
-            for (int j = MainWindow.GAME_MAX_BOTTOM + 50 + MainWindow.ENTITY_RADIUS; j < MainWindow.GAME_MAX_TOP; j += MainWindow.ENTITY_RADIUS*10) {
-                pos.set(i, j);
-                Entity e = Math.random() < MainWindow.CHANCE_INITIAL_PREY ? new Prey(pos) : new Predator(pos);
-                pWorld.addEntity(e);
-            }
-        }
 
         // pWorld.addEntity(new Prey(new Vector2(0, 0)));
         // pWorld.getEntities().get(0).brainEnabled = false;
@@ -167,9 +166,9 @@ public class GameScreen implements Screen {
     public float getTimeElapsed() { return timeElapsed/1000f; }
     public int getFps() { return Gdx.graphics.getFramesPerSecond(); }
     public float getFrameTime() { return lastDeltaFrameTime; }
-    public int getNumPrey() { return pWorld.getNumPrey(); }
-    public int getNumPred() { return pWorld.getNumPredators(); }
-    public int getGracePeriod() { return pWorld.getGraceCount(); }
+    public int getNumPrey() { return gameWorld.getNumPrey(); }
+    public int getNumPred() { return gameWorld.getNumPredators(); }
+    public int getGracePeriod() { return gameWorld.getGraceCount(); }
 
 
 

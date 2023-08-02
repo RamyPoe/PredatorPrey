@@ -50,10 +50,11 @@ public class MainWindow extends Game {
 	
 	// Spawning
 	public static final float CHANCE_INITIAL_PREY = 0.8f;
-	public static final int MAX_PREDATORS = 75;
-	public static final int MAX_PREY = 300;
-
+	
 	// Predator
+	public static final int MAX_PREDATORS = 75;
+	public static final int PREDATOR_GRACE_DEATH_THRESHOLD = 70;
+	
 	public static final float IDLE_ENERGY_DEPLETION = 18;
 	public static final float KILL_ENERGY_GAIN = 40;
 	public static final float KILL_SPLIT_GAIN = 50;
@@ -63,8 +64,9 @@ public class MainWindow extends Game {
 	public static final int PREDATOR_FOV = 50;
 	public static final int PREDATOR_SIGHT_RANGE = 2500;
 	
-	
 	// Prey
+	public static final int MAX_PREY = 300;
+
 	public static final float IDLE_ENERGY_GAIN = 4;
 	public static final int SPLIT_TIME_MS = 4000;
 	public static final int PREY_FOV = 120;
