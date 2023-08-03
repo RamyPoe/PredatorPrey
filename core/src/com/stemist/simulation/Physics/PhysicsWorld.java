@@ -1,12 +1,9 @@
 package com.stemist.simulation.Physics;
 
-import java.util.ListIterator;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Array.ArrayIterator;
 import com.stemist.simulation.MainWindow;
-import com.stemist.simulation.Game.GameWorld;
 import com.stemist.simulation.Game.Predator;
 import com.stemist.simulation.Game.Prey;
 
@@ -18,16 +15,26 @@ public class PhysicsWorld {
     // List of entities
     private Array<Entity> entities;
 
+    // For spatial hash grid
+    private Array<Entity>[] buckets;
+
     // For responses and game ticks
     private PhysicsTick physicsTick;
 
 
     // Constructor
+    @SuppressWarnings("unchecked")
     public PhysicsWorld(PhysicsTick physicsTick) {
         this.physicsTick = physicsTick;
 
         // Create array
         entities = new Array<>();
+
+        // Create buckets
+        buckets = new Array[MainWindow.COLS*MainWindow.ROWS];
+        for (int i = 0; i < buckets.length; i++) {
+            buckets[i] = new Array<Entity>();
+        }
     }
 
     // Add a new entity wihtin count limits
@@ -116,7 +123,9 @@ public class PhysicsWorld {
                     removeEntityIndex(i);
                     incr_i = false;
                     j++;
-                } else if (result == PhysicsTick.TICK_KILL_2) { removeEntityIndex(j); }
+                } else if (result == PhysicsTick.TICK_KILL_2) {
+                    removeEntityIndex(j);
+                }
 
                 // If not killing then collide
                 else {

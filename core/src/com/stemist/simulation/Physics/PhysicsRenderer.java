@@ -23,15 +23,26 @@ public class PhysicsRenderer {
         return renderer;
     }
 
-    // Render shapes
+    // Render World
     public void render(PhysicsWorld pWorld) {
 
         // Game box limits
         renderer.begin(ShapeType.Filled);
-        // renderer.setColor(153, 204, 255, 1);
         renderer.setColor(135f / 255f, 206f / 255f, 250f / 255f, 1f);
         renderer.rect(MainWindow.GAME_MAX_LEFT, MainWindow.GAME_MAX_BOTTOM, MainWindow.GAME_MAX_RIGHT-MainWindow.GAME_MAX_LEFT, MainWindow.GAME_MAX_TOP-MainWindow.GAME_MAX_BOTTOM);
         renderer.end();
+        
+        // Draw cell grid
+        renderer.begin(ShapeType.Filled);
+        renderer.setColor(164f / 255f, 213f / 255f, 245f / 255f, 1f);
+        for (int i = MainWindow.GAME_MAX_LEFT; i < MainWindow.GAME_MAX_RIGHT; i += MainWindow.CELL_SIZE) {
+            renderer.rectLine(i, MainWindow.GAME_MAX_TOP, i, MainWindow.GAME_MAX_BOTTOM, 32);
+        }
+        for (int i = MainWindow.GAME_MAX_BOTTOM; i < MainWindow.GAME_MAX_TOP; i += MainWindow.CELL_SIZE) {
+            renderer.rectLine(MainWindow.GAME_MAX_LEFT, i, MainWindow.GAME_MAX_RIGHT, i, 32);
+        }
+        renderer.end();
+
 
         // Get list of entities
         Array<Entity> e = pWorld.getEntities();

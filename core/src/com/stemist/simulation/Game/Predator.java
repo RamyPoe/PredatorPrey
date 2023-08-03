@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector2;
 import com.stemist.simulation.MainWindow;
 import com.stemist.simulation.Physics.Entity;
-import com.stemist.simulation.Physics.PhysicsWorld;
 import com.stemist.simulation.Physics.Rays;
 public class Predator extends Entity {
  

@@ -107,7 +107,7 @@ public class GameWorld implements PhysicsTick {
         if (e.brainEnabled) {
             e.changeAngle(netOut[0] * MainWindow.ENTITY_MAX_ANGLE_VEL, dt);
 
-            // Handicap predator and discourage backward
+            // Handicap predator max speed and discourage backward
             if (e instanceof Predator)
                 e.setVelocity((netOut[1] > 0 ? netOut[1]*0.8f : netOut[1]*0.2f) * MainWindow.ENTITY_MAX_VEL, dt);
             if (e instanceof Prey)

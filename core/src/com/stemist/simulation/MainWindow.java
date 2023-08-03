@@ -34,10 +34,14 @@ public class MainWindow extends Game {
 	public static final int V_HEIGHT = 800;
 
 	// Game Constraints
-	public static final int GAME_MAX_RIGHT 	=  2200;
-	public static final int GAME_MAX_LEFT 	= -2200;
-	public static final int GAME_MAX_TOP 	=  1800;
-	public static final int GAME_MAX_BOTTOM = -1800;
+	public static final int COLS = 12;
+	public static final int ROWS = 8;
+	public static final int CELL_SIZE = 600;
+
+	public static final int GAME_MAX_LEFT 	= 0;
+	public static final int GAME_MAX_RIGHT 	= COLS * CELL_SIZE;
+	public static final int GAME_MAX_BOTTOM = 0;
+	public static final int GAME_MAX_TOP 	= ROWS * CELL_SIZE;
 
 	// Game constants
 	public static final int ENTITY_RADIUS = 40;
