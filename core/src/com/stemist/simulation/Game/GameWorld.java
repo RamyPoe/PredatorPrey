@@ -25,9 +25,9 @@ public class GameWorld implements PhysicsTick {
     // Initial spawnings
     public void spawnInitial() {
         Vector2 pos = new Vector2(0, 0);
-        for (int i = MainWindow.GAME_MAX_LEFT + 50 + MainWindow.ENTITY_RADIUS; i < MainWindow.GAME_MAX_RIGHT; i += MainWindow.ENTITY_RADIUS*10) {
-            for (int j = MainWindow.GAME_MAX_BOTTOM + 50 + MainWindow.ENTITY_RADIUS; j < MainWindow.GAME_MAX_TOP; j += MainWindow.ENTITY_RADIUS*10) {
-                pos.set(i, j);
+        for (int i = MainWindow.GAME_MAX_BOTTOM + 50 + MainWindow.ENTITY_RADIUS; i < MainWindow.GAME_MAX_TOP; i += MainWindow.ENTITY_RADIUS*10) {
+            for (int j = MainWindow.GAME_MAX_LEFT + 50 + MainWindow.ENTITY_RADIUS; j < MainWindow.GAME_MAX_RIGHT; j += MainWindow.ENTITY_RADIUS*10) {
+                pos.set(j, i);
                 Entity e = Math.random() < MainWindow.CHANCE_INITIAL_PREY ? new Prey(pos) : new Predator(pos);
                 addEntity(e);
             }
@@ -90,7 +90,7 @@ public class GameWorld implements PhysicsTick {
 
         /* https://www.desmos.com/calculator/tam8eh34fe */
         for (int j = 0; j < MainWindow.ENTITY_NUM_RAYS; j++) {
-            netIn[j] = 1 - e.getRays().getRayCollisions(j);
+            netIn[j] = 1f - e.getRays().getRayCollisionsOutput(j);
 
             // netIn[j] = (netIn[j]) > 0.01f ? 1f : 0f;
             // netIn[j] = (float) Math.pow(netIn[j], 1f/2f);
@@ -115,11 +115,11 @@ public class GameWorld implements PhysicsTick {
         }
 
         // Reset rays
-        e.getRays().resetRays();
+        e.getRays().updateResetRays(e);
 
     }
 
-    // Update energy and check event, return true if predator died
+    // Update energy and check prey split, return true if predator died
     private boolean updateEnergy(Entity e, float dt) {
 
         // Make energy change

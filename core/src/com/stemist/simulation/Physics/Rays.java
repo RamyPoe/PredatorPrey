@@ -7,9 +7,10 @@ public class Rays {
     // How rays are distributed
     private float fov;
     private int numRays;
-
-    // How far it can detect
     private float distance;
+
+    // Hold all the rays
+    private Ray[] rays;
 
     // Length to nearest collision for each ray
     private float[] rayCollisions;
@@ -25,56 +26,85 @@ public class Rays {
 
         // For output
         rayCollisions = new float[numRays];
+
+        // For raycasting
+        rays = new Ray[numRays];
+        for (int i = 0; i < numRays; i++) { rays[i] = new Ray(distance); }
     }
 
-    // Reset to allow for check again
-    public void resetRays() {
-        for (int i = 0; i < rayCollisions.length; i++) {
-            rayCollisions[i] = 1f;
-        }
-    }
-
-    // Update list based on possible collision
-    public void checkRaysHits(Entity self, Entity e) {
+    // Reset to allow for check again while updating the rays' positions and angles
+    public void updateResetRays(Entity e) {
 
         // Setup for loop
-        float startAngle = self.getAngle() - fov/2;
+        float startAngle = e.getAngle() - fov/2;
         float stepAngle = fov/(numRays-1);
-
-        // For checking ray hits
-        Ray r = new Ray();
 
         // Loop through all rays
         for (int i = 0; i < numRays; i++) {
+            
+            // Reset ray output
+            rayCollisions[i] = 1f;
 
             // Get angle for this ray
             float angle = (startAngle + i*stepAngle) % 360;
 
-            // Setup this ray
-            r.origin.set(self.getPositionVector());
-            r.end.set(distance, 0);
-            r.end.setAngleDeg(angle);
-            r.end.add(r.origin);
-
-            // Check for collision
-            float distance = checkRayHit(r, e);
-            
-            // Check for min for this ray
-            if (rayCollisions[i] > distance) { rayCollisions[i] = distance; }
-
+            // Update current ray
+            Ray r = rays[i];
+            r.origin.set(e.getPositionVector());
+            r.dir.set(1f, 0);
+            r.dir.setAngleDeg(angle);
+            r.dir.nor();
         }
-
     }
 
-    // Check one ray and return percent along ray it hit
+    
+
+    // GETTERS
+    public int getNumRays() { return numRays; }
+    public float getFov() { return fov; }
+    public float getRayDistance() { return distance; }
+    public float getRayCollisionsOutput(int index) { return rayCollisions[index]; }
+    public void setRayCollisionsOutput(int index, float n) { rayCollisions[index] = n; }
+    public Ray[] getRayArray() { return rays; }
+
+
+}
+
+
+// Ray Struct
+class Ray {
+
+    // Starting point
+    public Vector2 origin;
+
+    // Normalized direction
+    public Vector2 dir;
+
+    // Magnitude determines length
+    private float magnitude;
+
+    // Constructor
+    public Ray(float magnitude) {
+        origin = new Vector2(0, 0);
+        dir = new Vector2(0, 0);
+        this.magnitude = magnitude;
+    }
+
+    // Get the magnitude
+    public float getMagnitude() { return magnitude; }
+
+    // Check ray and return percent along ray it hit
     // https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
-    private float checkRayHit(Ray r, Entity e) {
+    public float checkRayHit(Entity e) {
 
         // Quadratic formula setup
-        float dx1 = r.end.x-r.origin.x;
-        float dx2 = r.origin.x-e.getX();
-        float dy1 = r.end.y-r.origin.y;
-        float dy2 = r.origin.y-e.getY();
+        float endx = origin.x + getMagnitude() * dir.x;
+        float endy = origin.y + getMagnitude() * dir.y;
+
+        float dx1 = endx-origin.x;
+        float dx2 = origin.x-e.getX();
+        float dy1 = endy-origin.y;
+        float dy2 = origin.y-e.getY();
 
         float a = (float) Math.pow(dx1, 2) + (float) Math.pow(dy1, 2);
         float b = 2 * (dx1) * (dx2) + 2 * (dy1) * (dy2);
@@ -93,31 +123,6 @@ public class Rays {
         // 0 < t < 1
         return t < 0 ? 1f : t;
 
-    }
-
-    // GETTERS
-    public int getNumRays() { return numRays; }
-    public float getFov() { return fov; }
-    public float getRayDistance() { return distance; }
-    public float getRayCollisions(int index) { return rayCollisions[index]; }
-
-
-}
-
-
-// Ray Struct
-class Ray {
-
-    // Starting point
-    public Vector2 origin; 
-
-    // Magnitude determines length
-    public Vector2 end;
-
-    // Constructor
-    public Ray() {
-        origin = new Vector2(0, 0);
-        end = new Vector2(0, 0);
     }
 
 }

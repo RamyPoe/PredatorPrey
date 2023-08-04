@@ -26,30 +26,25 @@ public class PhysicsRenderer {
     // Render World
     public void render(PhysicsWorld pWorld) {
 
-        // Game box limits
+        // Begin renderer
         renderer.begin(ShapeType.Filled);
+
+        // Game box limits
         renderer.setColor(135f / 255f, 206f / 255f, 250f / 255f, 1f);
         renderer.rect(MainWindow.GAME_MAX_LEFT, MainWindow.GAME_MAX_BOTTOM, MainWindow.GAME_MAX_RIGHT-MainWindow.GAME_MAX_LEFT, MainWindow.GAME_MAX_TOP-MainWindow.GAME_MAX_BOTTOM);
-        renderer.end();
         
         // Draw cell grid
-        renderer.begin(ShapeType.Filled);
         renderer.setColor(164f / 255f, 213f / 255f, 245f / 255f, 1f);
-        for (int i = MainWindow.GAME_MAX_LEFT; i < MainWindow.GAME_MAX_RIGHT; i += MainWindow.CELL_SIZE) {
+        for (int i = MainWindow.GAME_MAX_LEFT+MainWindow.CELL_SIZE; i < MainWindow.GAME_MAX_RIGHT; i += MainWindow.CELL_SIZE) {
             renderer.rectLine(i, MainWindow.GAME_MAX_TOP, i, MainWindow.GAME_MAX_BOTTOM, 32);
         }
-        for (int i = MainWindow.GAME_MAX_BOTTOM; i < MainWindow.GAME_MAX_TOP; i += MainWindow.CELL_SIZE) {
+        for (int i = MainWindow.GAME_MAX_BOTTOM+MainWindow.CELL_SIZE; i < MainWindow.GAME_MAX_TOP; i += MainWindow.CELL_SIZE) {
             renderer.rectLine(MainWindow.GAME_MAX_LEFT, i, MainWindow.GAME_MAX_RIGHT, i, 32);
         }
-        renderer.end();
-
 
         // Get list of entities
         Array<Entity> e = pWorld.getEntities();
 
-        // Begin renderer
-        renderer.begin(ShapeType.Filled);
-        
         // Render every shape
         for (int i = 0; i < e.size; i++) {
             Entity en = e.get(i);
@@ -67,34 +62,20 @@ public class PhysicsRenderer {
             );
 
             // Draw when key held
-            if (!Gdx.input.isKeyPressed(Input.Keys.B)) {
-                continue;
-            }
+            if (!Gdx.input.isKeyPressed(Input.Keys.B)) { continue; }
 
             // Get rays instance
-            Rays r = en.getRays();
+            Rays rays = en.getRays();
+            Ray[] rayArr = rays.getRayArray();
 
             // Ray color
             renderer.setColor(Color.WHITE);
 
             // Draw the ray lines
-            float startAngle = en.getAngle() - r.getFov()/2;
-            float stepAngle = r.getFov()/(r.getNumRays()-1);
-            Ray ray = new Ray();
-
-            for (int j = 0; j < r.getNumRays(); j++) {
-
-                // Get angle for this ray
-                float angle = (startAngle + j*stepAngle) % 360;
-
-                // Setup this ray
-                ray.origin.set(en.getPositionVector());
-                ray.end.set(r.getRayDistance() * r.getRayCollisions(j), 0);
-                ray.end.setAngleDeg(angle);
-                ray.end.add(ray.origin);
-
-                // Draw line
-                renderer.rectLine(ray.origin.x, ray.origin.y, ray.end.x, ray.end.y, 2);
+            for (int j = 0; j < rays.getNumRays(); j++) {
+                float endx = rayArr[j].origin.x + rayArr[j].dir.x * rayArr[j].getMagnitude() * rays.getRayCollisionsOutput(j);
+                float endy = rayArr[j].origin.y + rayArr[j].dir.y * rayArr[j].getMagnitude() * rays.getRayCollisionsOutput(j);
+                renderer.rectLine(rayArr[j].origin.x, rayArr[j].origin.y, endx, endy, 2);
             }
 
         }

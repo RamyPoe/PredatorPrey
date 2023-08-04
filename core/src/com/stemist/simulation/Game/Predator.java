@@ -39,7 +39,7 @@ public class Predator extends Entity {
         // Reset split energy
         splitEnergy = 0;
         
-        // Get spawn pos
+        // Spawn at random offset from parent
         Vector2 newPos = new Vector2(MainWindow.ENTITY_RADIUS, 0);
         newPos.setAngleDeg((float) Math.random()*360f);
         newPos.add(position);
@@ -48,7 +48,7 @@ public class Predator extends Entity {
         Predator p = new Predator(newPos);
         p.brain = this.brain.copy().randomMutate();
         
-        // Return Predator
+        // Return new entity
         return p;
     }
 

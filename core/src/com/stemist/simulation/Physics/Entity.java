@@ -52,6 +52,27 @@ public class Entity extends VerletObject {
         
     }
 
+    /* ========================== */
+    /*       AABB COLLISION       */
+    /* ========================== */
+
+    public float getAabbLeft() { return position.x-radius; }
+    public float getAabbRight() { return position.x+radius; }
+    public float getAabbBottom() { return position.y-radius; }
+    public float getAabbTop() { return position.y+radius; }
+
+    public boolean isAabbCollide(Entity e) {
+        return (getAabbLeft() < e.getAabbRight() &&
+                getAabbRight() > e.getAabbLeft() &&
+                getAabbBottom() < e.getAabbTop() &&
+                getAabbTop() > e.getAabbBottom());
+    }
+
+
+    /* ========================== */
+    /* ========================== */
+
+
     // Get this entites gen
     public int getGeneration() { return brain.getGeneration(); }
 
@@ -75,7 +96,10 @@ public class Entity extends VerletObject {
     public void setVelocity(float vel, float dt) {
 
         // Can't move without energy
-        if (energy <= 0) { energy = 0; return; }
+        if (energy <= 0) {
+            energy = 0;
+            vel = 0;
+        }
 
         v.set(Math.abs(vel), 0);
         v.setAngleDeg(angle + (vel < 0 ? 180 : 0));
