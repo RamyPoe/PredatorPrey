@@ -16,7 +16,7 @@ public class GameWorld implements PhysicsTick {
     private float[] netOut;
 
     // Conserve predators until inital deaths
-    private int gracePeriod = MainWindow.PREADTOR_GRACE_PERIOD;
+    private int gracePeriod = MainWindow.PREDATOR_GRACE_PERIOD;
 
     // Count of each species
     private int numPrey = 0;
@@ -25,8 +25,8 @@ public class GameWorld implements PhysicsTick {
     // Initial spawnings
     public void spawnInitial() {
         Vector2 pos = new Vector2(0, 0);
-        for (int i = MainWindow.GAME_MAX_BOTTOM + 50 + MainWindow.ENTITY_RADIUS; i < MainWindow.GAME_MAX_TOP; i += MainWindow.ENTITY_RADIUS*10) {
-            for (int j = MainWindow.GAME_MAX_LEFT + 50 + MainWindow.ENTITY_RADIUS; j < MainWindow.GAME_MAX_RIGHT; j += MainWindow.ENTITY_RADIUS*10) {
+        for (int i = MainWindow.GAME_MAX_BOTTOM + 50 + MainWindow.ENTITY_RADIUS; i < MainWindow.GAME_MAX_TOP; i += MainWindow.ENTITY_RADIUS*30) {
+            for (int j = MainWindow.GAME_MAX_LEFT + 50 + MainWindow.ENTITY_RADIUS; j < MainWindow.GAME_MAX_RIGHT; j += MainWindow.ENTITY_RADIUS*30) {
                 pos.set(j, i);
                 Entity e = Math.random() < MainWindow.CHANCE_INITIAL_PREY ? new Prey(pos) : new Predator(pos);
                 addEntity(e);
@@ -42,7 +42,7 @@ public class GameWorld implements PhysicsTick {
     public int tick(Entity e, float dt) {
 
         // Random spawn for predator during grace period
-        if (gracePeriod > 0 && e instanceof Predator && Math.random() < 0.0002) { addEntity(((Predator) e).split()); }
+        if (gracePeriod > 0 && numPred < MainWindow.PREDATOR_GRACE_DEATH_THRESHOLD && e instanceof Predator && Math.random() < (0.00002*e.getEnergy())) { addEntity(((Predator) e).split()); }
 
         // Use raycast output for neural network
         updateNeuralNetRays(e, dt);
@@ -94,7 +94,7 @@ public class GameWorld implements PhysicsTick {
 
             // netIn[j] = (netIn[j]) > 0.01f ? 1f : 0f;
             // netIn[j] = (float) Math.pow(netIn[j], 1f/2f);
-            netIn[j] = (float) Math.pow(netIn[j], 1f/3f);
+            // netIn[j] = (float) Math.pow(netIn[j], 1f/3f);
         }
 
         // Bias neuron
@@ -107,9 +107,9 @@ public class GameWorld implements PhysicsTick {
         if (e.brainEnabled) {
             e.changeAngle(netOut[0] * MainWindow.ENTITY_MAX_ANGLE_VEL, dt);
 
-            // Handicap predator max speed and discourage backward
+            // Discourage predator backward movement
             if (e instanceof Predator)
-                e.setVelocity((netOut[1] > 0 ? netOut[1]*0.8f : netOut[1]*0.2f) * MainWindow.ENTITY_MAX_VEL, dt);
+                e.setVelocity((netOut[1] > 0 ? netOut[1] : netOut[1]*0.2f) * MainWindow.ENTITY_MAX_VEL, dt);
             if (e instanceof Prey)
                 e.setVelocity(netOut[1] * MainWindow.ENTITY_MAX_VEL, dt);
         }
@@ -128,7 +128,7 @@ public class GameWorld implements PhysicsTick {
         // Predators can die during grace period if limit is reached
         if (e instanceof Predator) {
             if (e.getEnergy() <= 0) {
-                if (gracePeriod > 0 && numPred < MainWindow.PREDATOR_GRACE_DEATH_THRESHOLD) { return false; }
+                if (gracePeriod > 0 && numPred < MainWindow.PREDATOR_GRACE_DEATH_THRESHOLD-10) { return false; }
                 return true;
             }
         } else {

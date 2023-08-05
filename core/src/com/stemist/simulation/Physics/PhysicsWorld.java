@@ -48,8 +48,8 @@ public class PhysicsWorld {
     public void addEntity(Entity e) { entities.add(e); }
 
     // Remove entity
-    public void removeEntityIndex(int index) { entities.removeIndex(index); }
-    public void removeEntityVal(Entity e) { entities.removeValue(e, true); }
+    private void removeEntityIndex(int index) { entities.removeIndex(index); }
+    private void removeEntityVal(Entity e) { entities.removeValue(e, true); }
 
 
 
@@ -61,14 +61,14 @@ public class PhysicsWorld {
         updateObjects(dt);
         checkRayCast();
         applyConstraint();
-        
+
     }
 
     // Apply tick to each entity
     public void tickEntities(float dt) {
         for (int i = 0; i < entities.size;) {
             int death = physicsTick.tick(entities.get(i), dt);
-            if (death == PhysicsTick.TICK_KILL_1) { entities.removeIndex(i); continue; }
+            if (death == PhysicsTick.TICK_KILL_1) { removeEntityIndex(i); continue; }
             i++;
         }
     }
@@ -106,8 +106,10 @@ public class PhysicsWorld {
             // Check each entity with every other
             for (int j = 0; j < buckets[i].size; j++) {
                 Entity e1 = buckets[i].get(j);
+                if (!entities.contains(e1, true)) { continue; }
                 for (int k = j+1; k < buckets[i].size; k++) {
                     Entity e2 = buckets[i].get(k);
+                    if (!entities.contains(e2, true)) { continue; }
                     
                     // Broad phase collision
                     if (!e1.isAabbCollide(e2)) { continue; }

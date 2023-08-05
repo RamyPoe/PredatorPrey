@@ -6,7 +6,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.stemist.simulation.MainWindow;
@@ -28,7 +27,7 @@ public class GameScreen implements Screen {
     // For game prespective
     private OrthographicCamera cam;
     private Viewport viewport;
-    public static final float CAM_SPEED_FACTOR = 1200f;
+    public static final float CAM_SPEED_FACTOR = 3200f;
     public static final float CAM_ZOOM_FACTOR = 13f;
 
     // Game hud
@@ -92,7 +91,7 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyPressed(Input.Keys.A) && cam.position.x > MainWindow.GAME_MAX_LEFT)   { cam.position.x -= CAM_SPEED_FACTOR * delta; }
         
         // Change zoom
-        if (Gdx.input.isKeyPressed(Input.Keys.Q) && cam.zoom < 10) { cam.zoom += CAM_ZOOM_FACTOR * delta; }
+        if (Gdx.input.isKeyPressed(Input.Keys.Q) && cam.zoom < 25) { cam.zoom += CAM_ZOOM_FACTOR * delta; }
         if (Gdx.input.isKeyPressed(Input.Keys.E) && cam.zoom > 1) { cam.zoom -= CAM_ZOOM_FACTOR * delta; }
         
         // Debug (Move player)
@@ -146,6 +145,9 @@ public class GameScreen implements Screen {
         
         // Draw transition
         main.transition.draw(delta);
+
+        // Debug
+        System.out.println(pWorld.getEntities().size-gameWorld.getNumPredators()-gameWorld.getNumPrey());
 
     }
 
