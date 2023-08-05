@@ -109,7 +109,7 @@ public class GameHud implements Disposable {
     }
 
     // Drawing to the screen
-    public void draw(float dt) {
+    public void draw() {
 
         // Sets the text for the labels
         setLabels();

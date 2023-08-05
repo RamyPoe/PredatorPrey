@@ -71,16 +71,8 @@ public class GameScreen implements Screen {
         // To render world
         pRenderer = new PhysicsRenderer(new ShapeRenderer());
 
-        // Player
-        player = new Prey(new Vector2(0, 0));
-        player.brainEnabled = false;
-        pWorld.addEntity(player);
-
-
-        // pWorld.addEntity(new Prey(new Vector2(0, 0)));
-        // pWorld.getEntities().get(0).brainEnabled = false;
-        // 
-        // player = new Prey(new Vector2(100, 100));
+        // Debug (Add Player)
+        // player = new Prey(new Vector2(0, 0));
         // player.brainEnabled = false;
         // pWorld.addEntity(player);
 
@@ -104,12 +96,13 @@ public class GameScreen implements Screen {
         if (Gdx.input.isKeyPressed(Input.Keys.E) && cam.zoom > 1) { cam.zoom -= CAM_ZOOM_FACTOR * delta; }
         
         // Debug (Move player)
+        /*
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) { player.setVelocity(MainWindow.ENTITY_MAX_VEL, delta); }
         else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) { player.setVelocity(-MainWindow.ENTITY_MAX_VEL, delta); }
         else { player.setVelocity(0, delta); }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) { player.changeAngle(-MainWindow.ENTITY_MAX_ANGLE_VEL, delta); }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) { player.changeAngle(MainWindow.ENTITY_MAX_ANGLE_VEL, delta); }
-
+        */
 
         // Skip button check if transitioning
         if (main.transition.active) { return; }
@@ -145,7 +138,7 @@ public class GameScreen implements Screen {
         pRenderer.render(pWorld);
         
         // Show hud
-        hud.draw(delta);
+        hud.draw();
 
         // Transition screen fade in
         if (!main.transition.haveFadedIn && !main.transition.active)
@@ -169,8 +162,6 @@ public class GameScreen implements Screen {
     public int getNumPrey() { return gameWorld.getNumPrey(); }
     public int getNumPred() { return gameWorld.getNumPredators(); }
     public int getGracePeriod() { return gameWorld.getGraceCount(); }
-
-
 
 
     @Override

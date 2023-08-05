@@ -67,6 +67,12 @@ public class Entity extends VerletObject {
                 getAabbBottom() < e.getAabbTop() &&
                 getAabbTop() > e.getAabbBottom());
     }
+    public boolean isAabbCollide(float x, float y) {
+        return (getAabbLeft() < x   &&
+                getAabbRight() > x  &&
+                getAabbBottom() < y &&
+                getAabbTop() > y );
+    }
 
 
     /* ========================== */

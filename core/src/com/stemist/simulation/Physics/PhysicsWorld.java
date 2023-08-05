@@ -59,7 +59,7 @@ public class PhysicsWorld {
         tickEntities(dt);
         checkCollisions(dt);
         updateObjects(dt);
-        // checkRayCast();
+        checkRayCast();
         applyConstraint();
         
     }
@@ -191,7 +191,6 @@ public class PhysicsWorld {
 
                 // Ray loop
                 while (t < r.getMagnitude() && !gotCollision) {
-                    System.out.println("T: " + t + "  E: " + i + " R: " + j);
                     // Set position
                     pos.set(r.dir).scl(t).add(r.origin);
 
@@ -208,13 +207,15 @@ public class PhysicsWorld {
                     // Check current cell for collisions
                     int bucket = hashGridBucket(pos.x, pos.y);
                     for (int k = 0; k < buckets[bucket].size; k++) {
-                        if (buckets[bucket].get(k) == e) { continue; }
-                        // System.out.println("BUCKET: " + bucket + "  OPP: " + k + "  SIZE: " + entities.size);
+                        Entity test = buckets[bucket].get(k);
+
+                        // Don't collide with yourself or same species
+                        if (test == e) { continue; }
+                        if ((e instanceof Prey && test instanceof Prey) || (e instanceof Predator && test instanceof Predator)) { continue; }
                         float out = r.checkRayHit(buckets[bucket].get(k));
 
                         // We got a hit
                         if (out < 1f) {
-                            System.out.println("GOT HIT");
                             rays.setRayCollisionsOutput(j, out);
                             gotCollision = true;
                             break;
@@ -236,8 +237,8 @@ public class PhysicsWorld {
                     float tDeltaX = (lineX-pos.x)/r.dir.x;
                     float tDeltaY = (lineY-pos.y)/r.dir.y;
 
-                    // Move toward the closer one
-                    t += (tDeltaX < tDeltaY ? tDeltaX : tDeltaY);
+                    // Move toward the closer one, add a bit to make sure we don't land exactly on line
+                    t += (tDeltaX < tDeltaY ? tDeltaX : tDeltaY) + 0.001f;
 
                 }
             }
