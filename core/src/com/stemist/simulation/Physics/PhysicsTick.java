@@ -8,7 +8,8 @@ public interface PhysicsTick {
     public static final int TICK_KILL_2 = 2;
 
     // Methods
-    public int tick(Entity e, float dt);
-    public int onCollision(Entity e1, Entity e2);
+    public void countEntityPredPrey(PhysicsWorld pWorld);
+    public int tick(PhysicsWorld pWorld, Entity e, float dt);
+    public int onCollision(PhysicsWorld pWorld, Entity e1, Entity e2);
 
 }

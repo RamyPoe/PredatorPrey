@@ -62,10 +62,9 @@ public class GameScreen implements Screen {
         // Create game world
         gameWorld = new GameWorld();
         pWorld = new PhysicsWorld(gameWorld);
-        gameWorld.setPhysicsWorld(pWorld);
 
         // Spawn intial entities to world
-        gameWorld.spawnInitial();
+        gameWorld.spawnInitial(pWorld);
 
         // To render world
         pRenderer = new PhysicsRenderer(new ShapeRenderer());
@@ -145,9 +144,6 @@ public class GameScreen implements Screen {
         
         // Draw transition
         main.transition.draw(delta);
-
-        // Debug
-        System.out.println(pWorld.getEntities().size-gameWorld.getNumPredators()-gameWorld.getNumPrey());
 
     }
 

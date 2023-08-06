@@ -56,6 +56,8 @@ public class PhysicsWorld {
     // Solve entity positions
     public void update(float dt) {
 
+        physicsTick.countEntityPredPrey(this);
+        
         tickEntities(dt);
         checkCollisions(dt);
         updateObjects(dt);
@@ -67,7 +69,7 @@ public class PhysicsWorld {
     // Apply tick to each entity
     public void tickEntities(float dt) {
         for (int i = 0; i < entities.size;) {
-            int death = physicsTick.tick(entities.get(i), dt);
+            int death = physicsTick.tick(this, entities.get(i), dt);
             if (death == PhysicsTick.TICK_KILL_1) { removeEntityIndex(i); continue; }
             i++;
         }
@@ -106,10 +108,8 @@ public class PhysicsWorld {
             // Check each entity with every other
             for (int j = 0; j < buckets[i].size; j++) {
                 Entity e1 = buckets[i].get(j);
-                if (!entities.contains(e1, true)) { continue; }
                 for (int k = j+1; k < buckets[i].size; k++) {
                     Entity e2 = buckets[i].get(k);
-                    if (!entities.contains(e2, true)) { continue; }
                     
                     // Broad phase collision
                     if (!e1.isAabbCollide(e2)) { continue; }
@@ -122,7 +122,7 @@ public class PhysicsWorld {
                     if (dist > minDist) { continue; }
 
                     // Refer to physicsTick for collision
-                    int result = physicsTick.onCollision(e1, e2);
+                    int result = physicsTick.onCollision(this, e1, e2);
                     if (result == PhysicsTick.TICK_KILL_1) { removeEntityVal(e1); }
                     else if (result == PhysicsTick.TICK_KILL_2) { removeEntityVal(e2); }
 

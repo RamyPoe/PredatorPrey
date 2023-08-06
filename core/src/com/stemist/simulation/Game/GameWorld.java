@@ -8,9 +8,6 @@ import com.stemist.simulation.Physics.PhysicsWorld;
 
 public class GameWorld implements PhysicsTick {
 
-    // For changing world entities
-    private PhysicsWorld pWorld;
-
     // Used for neural net
     private float[] netIn = new float[MainWindow.ENTITY_NUM_RAYS+1];
     private float[] netOut;
@@ -23,39 +20,46 @@ public class GameWorld implements PhysicsTick {
     private int numPred = 0;
 
     // Initial spawnings
-    public void spawnInitial() {
+    public void spawnInitial(PhysicsWorld pWorld) {
         Vector2 pos = new Vector2(0, 0);
         for (int i = MainWindow.GAME_MAX_BOTTOM + 50 + MainWindow.ENTITY_RADIUS; i < MainWindow.GAME_MAX_TOP; i += MainWindow.ENTITY_RADIUS*30) {
             for (int j = MainWindow.GAME_MAX_LEFT + 50 + MainWindow.ENTITY_RADIUS; j < MainWindow.GAME_MAX_RIGHT; j += MainWindow.ENTITY_RADIUS*30) {
                 pos.set(j, i);
                 Entity e = Math.random() < MainWindow.CHANCE_INITIAL_PREY ? new Prey(pos) : new Predator(pos);
-                addEntity(e);
+                addEntity(pWorld, e);
             }
         }
     }
 
-    // Necessary before calling other methods
-    public void setPhysicsWorld(PhysicsWorld pWorld) { this.pWorld = pWorld; }
+    // Calculate the number of predators and prey
+    @Override
+    public void countEntityPredPrey(PhysicsWorld pWorld) {
+        numPred = 0; numPrey = 0;
+        for (int i = 0; i < pWorld.getEntities().size; i++) {
+            if (pWorld.getEntities().get(i) instanceof Prey) { numPrey++; }
+            else if (pWorld.getEntities().get(i) instanceof Predator) { numPred++; }
+        }
+    }
 
     // Called for every entity every tick, returns if entity should be removed
     @Override
-    public int tick(Entity e, float dt) {
+    public int tick(PhysicsWorld pWorld, Entity e, float dt) {
 
         // Random spawn for predator during grace period
-        if (gracePeriod > 0 && numPred < MainWindow.PREDATOR_GRACE_DEATH_THRESHOLD && e instanceof Predator && Math.random() < (0.00002*e.getEnergy())) { addEntity(((Predator) e).split()); }
+        if (gracePeriod > 0 && numPred < MainWindow.PREDATOR_GRACE_DEATH_THRESHOLD && e instanceof Predator && Math.random() < (0.00002*e.getEnergy())) { addEntity(pWorld, ((Predator) e).split()); }
 
         // Use raycast output for neural network
         updateNeuralNetRays(e, dt);
 
         // Update energy and check for predator death
-        boolean death = updateEnergy(e, dt);
+        boolean death = updateEnergy(pWorld, e, dt);
         if (death) { numPred--; return PhysicsTick.TICK_KILL_1; }
         return PhysicsTick.TICK_NO_KILL;
 
     }
 
     @Override
-    public int onCollision(Entity e1, Entity e2) {
+    public int onCollision(PhysicsWorld pWorld, Entity e1, Entity e2) {
 
         // No kill if there are the same species
         if (!PhysicsWorld.onePreyOnePred(e1, e2)) { return PhysicsTick.TICK_NO_KILL; } 
@@ -71,10 +75,9 @@ public class GameWorld implements PhysicsTick {
             
             // Establish kill for predator
             ePred.madeKill();
-            if (ePred.checkSplit()) { addEntity(ePred.split()); }
+            if (ePred.checkSplit()) { addEntity(pWorld, ePred.split()); }
 
             // Remove prey
-            numPrey--;
             return (e1 instanceof Prey ? PhysicsTick.TICK_KILL_1 : PhysicsTick.TICK_KILL_2);
 
         }
@@ -120,7 +123,7 @@ public class GameWorld implements PhysicsTick {
     }
 
     // Update energy and check prey split, return true if predator died
-    private boolean updateEnergy(Entity e, float dt) {
+    private boolean updateEnergy(PhysicsWorld pWorld, Entity e, float dt) {
 
         // Make energy change
         e.changeEnergy(dt);
@@ -137,7 +140,7 @@ public class GameWorld implements PhysicsTick {
             Prey eTemp = (Prey) e;
 
             // Check for split
-            if (eTemp.checkSplit()) { addEntity(eTemp.split()); }
+            if (eTemp.checkSplit()) { addEntity(pWorld, eTemp.split()); }
 
         }
 
@@ -146,7 +149,7 @@ public class GameWorld implements PhysicsTick {
     }
 
     // Add entity to world
-    private void addEntity(Entity e) {
+    private void addEntity(PhysicsWorld pWorld, Entity e) {
         if (e instanceof Prey) {
             if (numPrey >= MainWindow.MAX_PREY) { return; }
             numPrey++;
