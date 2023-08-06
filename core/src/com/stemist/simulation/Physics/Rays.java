@@ -12,9 +12,6 @@ public class Rays {
     // Hold all the rays
     private Ray[] rays;
 
-    // Length to nearest collision for each ray
-    private float[] rayCollisions;
-
     // Constructor
     public Rays (float fov, int numRays, float distance) {
         this.fov = fov;
@@ -23,9 +20,6 @@ public class Rays {
 
         // Not enough rays
         if (numRays < 2) { throw new Error("CANNOT HAVE LESS THAN 2 RAYS!"); }
-
-        // For output
-        rayCollisions = new float[numRays];
 
         // For raycasting
         rays = new Ray[numRays];
@@ -42,9 +36,6 @@ public class Rays {
         // Loop through all rays
         for (int i = 0; i < numRays; i++) {
             
-            // Reset ray output
-            rayCollisions[i] = 1f;
-
             // Get angle for this ray
             float angle = (startAngle + i*stepAngle) % 360;
 
@@ -63,8 +54,6 @@ public class Rays {
     public int getNumRays() { return numRays; }
     public float getFov() { return fov; }
     public float getRayDistance() { return distance; }
-    public float getRayCollisionsOutput(int index) { return rayCollisions[index]; }
-    public void setRayCollisionsOutput(int index, float n) { rayCollisions[index] = n; }
     public Ray[] getRayArray() { return rays; }
 
 

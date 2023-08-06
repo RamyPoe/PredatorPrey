@@ -7,6 +7,13 @@ import com.stemist.simulation.Physics.Entity;
 import com.stemist.simulation.Physics.Rays;
 public class Predator extends Entity {
  
+    // For raycasting
+    private static Rays rays;
+    static {
+        // Rays for predators
+        rays = new Rays(MainWindow.PREDATOR_FOV, MainWindow.ENTITY_NUM_RAYS, MainWindow.PREDATOR_SIGHT_RANGE);
+    }
+
     // Digestion timer
     private float digestTimer;
 
@@ -19,9 +26,6 @@ public class Predator extends Entity {
 
         // Predator color
         this.color = Color.RED;
-
-        // Rays for predators
-        rays = new Rays(MainWindow.PREDATOR_FOV, MainWindow.ENTITY_NUM_RAYS, MainWindow.PREDATOR_SIGHT_RANGE);
 
         // Initial timer
         startDigesting();
@@ -78,5 +82,8 @@ public class Predator extends Entity {
     private void startDigesting() {
         digestTimer = MainWindow.DIGESTION_TIME_MS;
     }
+
+    // Getting predator rays
+    public static Rays getRays() { return rays; }
 
 }

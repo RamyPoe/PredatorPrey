@@ -24,7 +24,7 @@ public class Entity extends VerletObject {
     private Vector2 v;
 
     // For network inputs
-    protected Rays rays;
+    protected float[] rayCollisions;
 
     // Neural Network
     protected RtNeat brain;
@@ -50,6 +50,9 @@ public class Entity extends VerletObject {
         // Create brain
         brain = new RtNeat(MainWindow.ENTITY_NUM_RAYS+1, 2).randomMutate();
         
+        // Create output array for ray collisions
+        rayCollisions = new float[MainWindow.ENTITY_NUM_RAYS];
+
     }
 
     /* ========================== */
@@ -85,9 +88,6 @@ public class Entity extends VerletObject {
     // Get neural net output
     public float[] brainForward(float[] inputs) { return brain.forward(inputs); }
 
-    // Get the rays instance
-    public Rays getRays() { return rays; }    
-    
     // Changing angle
     public void setAngle(float angle) { this.angle = angle; }
     public float getAngle() { return angle; }
@@ -128,5 +128,13 @@ public class Entity extends VerletObject {
 
     // Get current energy
     public float getEnergy() { return energy; }
+
+    // Get ray collision outputs
+    public float[] getRayCollisionOutArr() { return rayCollisions; }
+    public void resetRayCollisionOutArr() {
+        for (int i = 0; i < rayCollisions.length; i++) {
+            rayCollisions[i] = 1f;
+        }
+    }
 
 }

@@ -34,8 +34,8 @@ public class MainWindow extends Game {
 	public static final int V_HEIGHT = 800;
 
 	// Game Constraints
-	public static final int COLS = 20;
-	public static final int ROWS = 20;
+	public static final int COLS = 40;
+	public static final int ROWS = 40;
 	public static final int CELL_SIZE = 500;
 
 	public static final int GAME_MAX_LEFT 	= 0;
@@ -55,11 +55,12 @@ public class MainWindow extends Game {
 	public static final float CHANCE_INITIAL_PREY = 0.8f;
 	
 	// Predator
-	public static final int MAX_PREDATORS = 130;
-	public static final int PREDATOR_GRACE_PERIOD = 1000;
-	public static final int PREDATOR_GRACE_DEATH_THRESHOLD = 120;
+	public static final int MAX_PREDATORS = 260;
+	public static final int PREDATOR_GRACE_PERIOD = 2000;
+	public static final int PREDATOR_GRACE_DEATH_THRESHOLD = 200;
+	public static final int PREDATOR_GRACE_TIMER = 4000;
 	
-	public static final float IDLE_ENERGY_DEPLETION = 8;
+	public static final float IDLE_ENERGY_DEPLETION = 7;
 	public static final float KILL_ENERGY_GAIN = 30;
 	public static final float KILL_SPLIT_GAIN = 50;
 	public static final float SPLIT_ENERGY_THRESHOLD = 100;
@@ -69,7 +70,7 @@ public class MainWindow extends Game {
 	public static final int PREDATOR_SIGHT_RANGE = 9000;
 	
 	// Prey
-	public static final int MAX_PREY = 725;
+	public static final int MAX_PREY = 1400;
 	public static final int SPLIT_TIME_MS = 5000;
 
 	public static final float IDLE_ENERGY_GAIN = 0.5f;

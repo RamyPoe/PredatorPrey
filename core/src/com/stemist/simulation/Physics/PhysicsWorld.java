@@ -48,7 +48,6 @@ public class PhysicsWorld {
     public void addEntity(Entity e) { entities.add(e); }
 
     // Remove entity
-    private void removeEntityIndex(int index) { entities.removeIndex(index); }
     private void removeEntityVal(Entity e) { entities.removeValue(e, true); }
 
 
@@ -58,7 +57,7 @@ public class PhysicsWorld {
 
         physicsTick.countEntityPredPrey(this);
         
-        tickEntities(dt);
+        physicsTick.tickEntities(this, dt);
         checkCollisions(dt);
         updateObjects(dt);
         checkRayCast();
@@ -66,14 +65,6 @@ public class PhysicsWorld {
 
     }
 
-    // Apply tick to each entity
-    public void tickEntities(float dt) {
-        for (int i = 0; i < entities.size;) {
-            int death = physicsTick.tick(this, entities.get(i), dt);
-            if (death == PhysicsTick.TICK_KILL_1) { removeEntityIndex(i); continue; }
-            i++;
-        }
-    }
 
 
     // Checks all body and raycast collisions and registers kills
@@ -175,7 +166,9 @@ public class PhysicsWorld {
         // Every entity
         for (int i = 0; i < entities.size; i++) {
             Entity e = entities.get(i);
-            Rays rays = e.getRays();
+            e.resetRayCollisionOutArr();
+            Rays rays = e instanceof Prey ? Prey.getRays() : Predator.getRays();
+            rays.updateResetRays(e);
 
             // Every ray for this entity
             for (int j = 0; j < rays.getNumRays(); j++) {
@@ -218,7 +211,7 @@ public class PhysicsWorld {
 
                         // We got a hit
                         if (out < 1f) {
-                            rays.setRayCollisionsOutput(j, out);
+                            e.getRayCollisionOutArr()[j] = out;
                             gotCollision = true;
                             break;
                         }

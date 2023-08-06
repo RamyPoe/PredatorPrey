@@ -12,8 +12,9 @@ public class GameWorld implements PhysicsTick {
     private float[] netIn = new float[MainWindow.ENTITY_NUM_RAYS+1];
     private float[] netOut;
 
-    // Conserve predators until inital deaths
+    // Artifically split predators until inital deaths
     private int gracePeriod = MainWindow.PREDATOR_GRACE_PERIOD;
+    private float graceTimer = MainWindow.PREDATOR_GRACE_TIMER;
 
     // Count of each species
     private int numPrey = 0;
@@ -43,18 +44,39 @@ public class GameWorld implements PhysicsTick {
 
     // Called for every entity every tick, returns if entity should be removed
     @Override
-    public int tick(PhysicsWorld pWorld, Entity e, float dt) {
+    public void tickEntities(PhysicsWorld pWorld, float dt) {
+        // Reduce grace timer
+        graceTimer -= dt*1000f;
 
-        // Random spawn for predator during grace period
-        if (gracePeriod > 0 && numPred < MainWindow.PREDATOR_GRACE_DEATH_THRESHOLD && e instanceof Predator && Math.random() < (0.00002*e.getEnergy())) { addEntity(pWorld, ((Predator) e).split()); }
+        // Avoid the children made
+        int size = pWorld.getEntities().size;
 
-        // Use raycast output for neural network
-        updateNeuralNetRays(e, dt);
+        // Tick every entity
+        for (int i = 0; i < size;) {
+            Entity e = pWorld.getEntities().get(i);
+            
+            // Update energy and check for predator death
+            boolean death = updateEnergy(pWorld, e, dt);
+            if (death) {
+                numPred--; size--;
+                pWorld.getEntities().removeIndex(i);
+            } else { i++; }
 
-        // Update energy and check for predator death
-        boolean death = updateEnergy(pWorld, e, dt);
-        if (death) { numPred--; return PhysicsTick.TICK_KILL_1; }
-        return PhysicsTick.TICK_NO_KILL;
+            // Use raycast output for neural network
+            updateNeuralNetRays(e, dt);
+
+            // Random spawn for predator during grace period
+            if (e instanceof Predator &&
+                gracePeriod > 0 &&
+                numPred < MainWindow.PREDATOR_GRACE_DEATH_THRESHOLD &&
+                graceTimer <= 0 &&
+                Math.random() < 0.01*(e.getEnergy()/MainWindow.ENTITY_MAX_ENERGY*100)
+            ) { addEntity(pWorld, ((Predator) e).split()); }
+        
+        }
+
+        // Reset timer
+        if (gracePeriod > 0 && graceTimer <= 0) { graceTimer = MainWindow.PREDATOR_GRACE_TIMER; }
 
     }
 
@@ -93,7 +115,7 @@ public class GameWorld implements PhysicsTick {
 
         /* https://www.desmos.com/calculator/tam8eh34fe */
         for (int j = 0; j < MainWindow.ENTITY_NUM_RAYS; j++) {
-            netIn[j] = 1f - e.getRays().getRayCollisionsOutput(j);
+            netIn[j] = 1f - e.getRayCollisionOutArr()[j];
 
             // netIn[j] = (netIn[j]) > 0.01f ? 1f : 0f;
             // netIn[j] = (float) Math.pow(netIn[j], 1f/2f);
@@ -116,9 +138,6 @@ public class GameWorld implements PhysicsTick {
             if (e instanceof Prey)
                 e.setVelocity(netOut[1] * MainWindow.ENTITY_MAX_VEL, dt);
         }
-
-        // Reset rays
-        e.getRays().updateResetRays(e);
 
     }
 

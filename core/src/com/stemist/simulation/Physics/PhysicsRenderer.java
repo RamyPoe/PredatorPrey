@@ -4,8 +4,11 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.stemist.simulation.MainWindow;
+import com.stemist.simulation.Game.Predator;
+import com.stemist.simulation.Game.Prey;
 
 public class PhysicsRenderer {
 
@@ -65,17 +68,26 @@ public class PhysicsRenderer {
             if (!Gdx.input.isKeyPressed(Input.Keys.B)) { continue; }
 
             // Get rays instance
-            Rays rays = en.getRays();
-            Ray[] rayArr = rays.getRayArray();
+            Rays rays = en instanceof Prey ? Prey.getRays() : Predator.getRays();
 
             // Ray color
             renderer.setColor(Color.WHITE);
 
-            // Draw the ray lines
+            // Setup for loop
+            float startAngle = en.getAngle() - rays.getFov()/2;
+            float stepAngle = rays.getFov()/(rays.getNumRays()-1);
+
+            // Loop through all rays
             for (int j = 0; j < rays.getNumRays(); j++) {
-                float endx = rayArr[j].origin.x + rayArr[j].dir.x * rayArr[j].getMagnitude() * rays.getRayCollisionsOutput(j);
-                float endy = rayArr[j].origin.y + rayArr[j].dir.y * rayArr[j].getMagnitude() * rays.getRayCollisionsOutput(j);
-                renderer.rectLine(rayArr[j].origin.x, rayArr[j].origin.y, endx, endy, 2);
+                
+                // Get angle for this ray
+                float angle = (startAngle + j*stepAngle) % 360;
+
+                // Get end point of ray
+                Vector2 end = new Vector2(rays.getRayDistance() * en.getRayCollisionOutArr()[j], 0).setAngleDeg(angle).add(en.getPositionVector());
+
+                // Draw ray
+                renderer.rectLine(en.getX(), en.getY(), end.x, end.y, 2);
             }
 
         }
