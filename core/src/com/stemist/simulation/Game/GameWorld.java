@@ -60,17 +60,15 @@ public class GameWorld implements PhysicsTick {
             if (death) {
                 numPred--; size--;
                 pWorld.getEntities().removeIndex(i);
+                continue;
             } else { i++; }
-
-            // Use raycast output for neural network
-            updateNeuralNetRays(e, dt);
 
             // Random spawn for predator during grace period
             if (e instanceof Predator &&
                 gracePeriod > 0 &&
                 numPred < MainWindow.PREDATOR_GRACE_DEATH_THRESHOLD &&
                 graceTimer <= 0 &&
-                Math.random() < 0.01*(e.getEnergy()/MainWindow.ENTITY_MAX_ENERGY*100)
+                Math.random() < e.getEnergy()/MainWindow.ENTITY_MAX_ENERGY
             ) { addEntity(pWorld, ((Predator) e).split()); }
         
         }
@@ -78,6 +76,14 @@ public class GameWorld implements PhysicsTick {
         // Reset timer
         if (gracePeriod > 0 && graceTimer <= 0) { graceTimer = MainWindow.PREDATOR_GRACE_TIMER; }
 
+    }
+
+    @Override
+    public void updateNeuralEntities(PhysicsWorld pWorld, float dt) {
+        for (int i = 0; i < pWorld.getEntities().size; i++) {
+            Entity e = pWorld.getEntities().get(i);
+            updateNeuralNetRays(e, dt);
+        }
     }
 
     @Override

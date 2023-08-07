@@ -54,7 +54,7 @@ public class PhysicsRenderer {
             
             // Draw a circle
             renderer.setColor(en.getColor());
-            renderer.circle(en.getX(), en.getY(), en.getRadius()); 
+            renderer.circle(en.getX(), en.getY(), en.getRadius(), 16); 
 
             // Show direction
             renderer.setColor(Color.LIGHT_GRAY);

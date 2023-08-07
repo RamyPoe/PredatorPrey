@@ -1,6 +1,7 @@
 package com.stemist.simulation.Physics;
 
 import com.badlogic.gdx.math.Vector2;
+import com.stemist.simulation.MainWindow;
 
 public class Rays {
 
@@ -44,7 +45,6 @@ public class Rays {
             r.origin.set(e.getPositionVector());
             r.dir.set(1f, 0);
             r.dir.setAngleDeg(angle);
-            r.dir.nor();
         }
     }
 
@@ -82,8 +82,7 @@ class Ray {
     // Get the magnitude
     public float getMagnitude() { return magnitude; }
 
-    // Check ray and return percent along ray it hit
-    // https://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
+    // Check ray and return percent along ray it hit, approximate entity as box
     public float checkRayHit(Entity e) {
 
         // Quadratic formula setup
@@ -111,6 +110,7 @@ class Ray {
 
         // 0 < t < 1
         return t < 0 ? 1f : t;
+
 
     }
 

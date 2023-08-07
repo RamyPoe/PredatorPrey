@@ -10,6 +10,7 @@ public interface PhysicsTick {
     // Methods
     public void countEntityPredPrey(PhysicsWorld pWorld);
     public void tickEntities(PhysicsWorld pWorld, float dt);
+    public void updateNeuralEntities(PhysicsWorld pWorld, float dt);
     public int onCollision(PhysicsWorld pWorld, Entity e1, Entity e2);
 
 }

@@ -3,6 +3,8 @@ package com.stemist.simulation.Physics;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -14,6 +16,9 @@ public class PhysicsWorld {
     
     // How "squishy" collisions are
     private final float RESPONSE_COEf = 0.2f;
+
+    // How many threads
+    private final int NUM_THREADS = 2;
     
     // List of entities
     private Array<Entity> entities;
@@ -25,6 +30,25 @@ public class PhysicsWorld {
     // For responses and game ticks
     private PhysicsTick physicsTick;
 
+    // Multi threading
+    ExecutorService executor;
+    class PhysicsThread implements Runnable {
+        public int i1, i2;
+        public boolean done = false;
+        PhysicsWorld pWorld = null;
+
+        public PhysicsThread(PhysicsWorld pWorld) {
+            this.pWorld = pWorld;
+        }
+
+        @Override
+        public void run() {
+                try { pWorld.checkRayCast(i1, i2); } catch (Exception e) {}
+                done = true;
+            }
+        }
+    
+    private PhysicsThread[] physicsThreads;
 
     // Constructor
     @SuppressWarnings("unchecked")
@@ -42,6 +66,14 @@ public class PhysicsWorld {
 
         // Helper for avoiding duplicates
         uniqueVals = new HashSet<>();
+
+        // Multi threading
+        executor = Executors.newFixedThreadPool(NUM_THREADS);
+        physicsThreads = new PhysicsThread[NUM_THREADS];
+        for (int i = 0; i < NUM_THREADS; i++) {
+            physicsThreads[i] = new PhysicsThread(this);
+        }
+
     }
 
     // Add a new entity wihtin count limits
@@ -55,13 +87,49 @@ public class PhysicsWorld {
     // Solve entity positions
     public void update(float dt) {
 
+        // Count number we have for HUD
         physicsTick.countEntityPredPrey(this);
+
         
         physicsTick.tickEntities(this, dt);
+        physicsTick.updateNeuralEntities(this, dt);
+        
+        // Add entites to hash grid
+        clearBuckets();
+        fillBuckets();
+        
         checkCollisions(dt);
+        
         updateObjects(dt);
-        checkRayCast();
+        
+        // double timer = MainWindow.getTimeMs();
+    
+        // Use thread pool
+        for (int i = 0; i < NUM_THREADS; i++) {
+            int step = entities.size/NUM_THREADS-1;
+            int i1 = i * step;
+            int i2 = (i == NUM_THREADS-1 ? entities.size : (i+1)*step);
+            
+            physicsThreads[i].i1 = i1;
+            physicsThreads[i].i2 = i2;
+
+            executor.execute(physicsThreads[i]);
+        }
+        
+
+        // Apply world constraints to entities
         applyConstraint();
+
+        // Wait until threads are done
+        boolean threadDone = true;
+        do {
+            threadDone = true;
+            for (int i = 0; i < physicsThreads.length; i++) {
+                if (!physicsThreads[i].done) { threadDone = false; }
+            }
+        } while (!threadDone);
+
+        // System.out.println(MainWindow.getTimeMs()-timer);
 
     }
 
@@ -69,29 +137,6 @@ public class PhysicsWorld {
 
     // Checks all body and raycast collisions and registers kills
     private void checkCollisions(float dt) {
-        
-        // Clear before adding again
-        clearBuckets();
-
-        // Add each entity to grid
-        for (int i = 0; i < entities.size; i++) {
-
-            // Get entity
-            Entity e = entities.get(i);
-
-            // Get bucket for each corner
-            uniqueVals.clear();
-            uniqueVals.add(hashGridBucket(e.getAabbLeft(), e.getAabbTop()));
-            uniqueVals.add(hashGridBucket(e.getAabbRight(), e.getAabbTop()));
-            uniqueVals.add(hashGridBucket(e.getAabbLeft(), e.getAabbBottom()));
-            uniqueVals.add(hashGridBucket(e.getAabbRight(), e.getAabbBottom()));
-            
-            // Add entity to its buckets
-            for (int bucket : uniqueVals) {
-                buckets[bucket].add(e);
-            }
-
-        }
 
         // Check collisions in each bucket
         for (int i = 0; i < buckets.length; i++) {
@@ -150,6 +195,29 @@ public class PhysicsWorld {
         }
     }
 
+    // Fills buckets with entites
+    private void fillBuckets() {
+
+        // Add each entity
+        for (int i = 0; i < entities.size; i++) {
+
+            // Get entity
+            Entity e = entities.get(i);
+
+            // Get bucket for each corner
+            uniqueVals.clear();
+            uniqueVals.add(hashGridBucket(e.getAabbLeft(), e.getAabbTop()));
+            uniqueVals.add(hashGridBucket(e.getAabbRight(), e.getAabbTop()));
+            uniqueVals.add(hashGridBucket(e.getAabbLeft(), e.getAabbBottom()));
+            uniqueVals.add(hashGridBucket(e.getAabbRight(), e.getAabbBottom()));
+            
+            // Add entity to its buckets
+            for (int bucket : uniqueVals) {
+                buckets[bucket].add(e);
+            }
+
+        }
+    }
     
     // Update the physics model for each entity
     private void updateObjects(float dt) {
@@ -162,9 +230,9 @@ public class PhysicsWorld {
     
 
     // Checks raycast hits for all entites
-    private void checkRayCast() {
+    public void checkRayCast(int i1, int i2) {
         // Every entity
-        for (int i = 0; i < entities.size; i++) {
+        for (int i = i1; i < i2; i++) {
             Entity e = entities.get(i);
             e.resetRayCollisionOutArr();
             Rays rays = e instanceof Prey ? Prey.getRays() : Predator.getRays();
