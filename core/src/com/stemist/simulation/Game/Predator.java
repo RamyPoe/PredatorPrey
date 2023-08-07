@@ -13,6 +13,9 @@ public class Predator extends Entity {
     // Split energy
     private float splitEnergy = 0;
 
+    // Prey can kill predator
+    private int hitpoints = MainWindow.PREDATOR_HITPOINTS;
+
     // Inherit position and radius 
     public Predator(Vector2 position) {
         super(position); 
@@ -78,5 +81,9 @@ public class Predator extends Entity {
     private void startDigesting() {
         digestTimer = MainWindow.DIGESTION_TIME_MS;
     }
+
+    // When get hit
+    public void reduceHitpoints() { hitpoints--; }
+    public boolean isHitpointDead() { return hitpoints <= 0; }
 
 }

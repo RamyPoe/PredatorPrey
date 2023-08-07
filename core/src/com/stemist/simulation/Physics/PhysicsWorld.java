@@ -18,7 +18,7 @@ import com.stemist.simulation.Game.Prey;
 public class PhysicsWorld {
     
     // How "squishy" collisions are
-    private final float RESPONSE_COEf = 0.2f;
+    private final float RESPONSE_COEf = 0.4f;
 
     // How many threads
     private final int NUM_THREADS = 8;
@@ -273,12 +273,12 @@ public class PhysicsWorld {
 
                         // Don't collide with yourself or same species
                         if (test == e) { continue; }
-                        if ((e instanceof Prey && test instanceof Prey) || (e instanceof Predator && test instanceof Predator)) { continue; }
                         float out = r.checkRayHit(buckets[bucket].get(k));
 
                         // We got a hit
                         if (out < 1f) {
                             e.getRayCollisionOutArr()[j] = out;
+                            e.getRayHitEnemyArr()[j] = onePreyOnePred(e, test);
                             gotCollision = true;
                             break;
                         }

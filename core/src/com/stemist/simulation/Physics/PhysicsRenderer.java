@@ -6,7 +6,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.utils.Array;
 import com.stemist.simulation.MainWindow;
 
 public class PhysicsRenderer {
@@ -64,7 +63,7 @@ public class PhysicsRenderer {
             );
 
             // Draw when key held
-            if (!Gdx.input.isKeyPressed(Input.Keys.B)) { continue; }
+            if (!Gdx.input.isKeyPressed(Input.Keys.B) && !en.isSpectating()) { continue; }
 
             // Get rays instance
             Rays rays = en.getRays();

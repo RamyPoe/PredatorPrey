@@ -6,7 +6,6 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.stemist.simulation.MainWindow;
@@ -39,7 +38,12 @@ public class GameScreen implements Screen {
     private PhysicsWorld pWorld;
     private PhysicsRenderer pRenderer;
 
+    // Optional player
     Entity player;
+
+    // For spectating
+    private Entity spectatingEntity;
+    private boolean spectating = false;
 
     
     // Constructor
@@ -71,9 +75,9 @@ public class GameScreen implements Screen {
         pRenderer = new PhysicsRenderer(new ShapeRenderer());
 
         // Debug (Add Player)
-        player = new Prey(new Vector2(0, 0));
-        player.brainEnabled = false;
-        pWorld.addEntity(player);
+        // player = new Prey(new Vector2(0, 0));
+        // player.brainEnabled = false;
+        // pWorld.addEntity(player);
 
     }
 
@@ -85,23 +89,47 @@ public class GameScreen implements Screen {
     private void update(float delta) {
         
         // Move camera
-        if (Gdx.input.isKeyPressed(Input.Keys.W) && cam.position.y < MainWindow.GAME_MAX_TOP)    { cam.position.y += CAM_SPEED_FACTOR * delta; }
-        if (Gdx.input.isKeyPressed(Input.Keys.S) && cam.position.y > MainWindow.GAME_MAX_BOTTOM) { cam.position.y -= CAM_SPEED_FACTOR * delta; }
-        if (Gdx.input.isKeyPressed(Input.Keys.D) && cam.position.x < MainWindow.GAME_MAX_RIGHT)  { cam.position.x += CAM_SPEED_FACTOR * delta; }
-        if (Gdx.input.isKeyPressed(Input.Keys.A) && cam.position.x > MainWindow.GAME_MAX_LEFT)   { cam.position.x -= CAM_SPEED_FACTOR * delta; }
+        if (!spectating && Gdx.input.isKeyPressed(Input.Keys.W) && cam.position.y < MainWindow.GAME_MAX_TOP)    { cam.position.y += CAM_SPEED_FACTOR * delta; }
+        if (!spectating && Gdx.input.isKeyPressed(Input.Keys.S) && cam.position.y > MainWindow.GAME_MAX_BOTTOM) { cam.position.y -= CAM_SPEED_FACTOR * delta; }
+        if (!spectating && Gdx.input.isKeyPressed(Input.Keys.D) && cam.position.x < MainWindow.GAME_MAX_RIGHT)  { cam.position.x += CAM_SPEED_FACTOR * delta; }
+        if (!spectating && Gdx.input.isKeyPressed(Input.Keys.A) && cam.position.x > MainWindow.GAME_MAX_LEFT)   { cam.position.x -= CAM_SPEED_FACTOR * delta; }
         
         // Change zoom
-        if (Gdx.input.isKeyPressed(Input.Keys.Q) && cam.zoom < 25) { cam.zoom += CAM_ZOOM_FACTOR * delta; }
-        if (Gdx.input.isKeyPressed(Input.Keys.E) && cam.zoom > 1) { cam.zoom -= CAM_ZOOM_FACTOR * delta; }
+        if (!spectating && Gdx.input.isKeyPressed(Input.Keys.Q) && cam.zoom < 25) { cam.zoom += CAM_ZOOM_FACTOR * delta; }
+        if (!spectating && Gdx.input.isKeyPressed(Input.Keys.E) && cam.zoom > 1) { cam.zoom -= CAM_ZOOM_FACTOR * delta; }
         
+        // Enter and leave spectating mode
+        if (spectating) {
+            while (spectatingEntity.isDead()) {
+                spectatingEntity = pWorld.getEntities().get(
+                    (int) (Math.random()*pWorld.getEntities().size())
+                );
+            }
+            spectatingEntity.setSpectating(true);
+            cam.position.x = spectatingEntity.getX();
+            cam.position.y = spectatingEntity.getY();
+            cam.zoom = 6;
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            spectating = !spectating; 
+            if (spectating) {
+                spectatingEntity = pWorld.getEntities().get(
+                    (int) (Math.random()*pWorld.getEntities().size())
+                );
+                spectatingEntity.setSpectating(true);
+            } else {
+                spectatingEntity.setSpectating(false);
+            }
+        }
+
         // Debug (Move player)
-        // /*
+        /*
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) { player.setVelocity(MainWindow.ENTITY_MAX_VEL, delta); }
         else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) { player.setVelocity(-MainWindow.ENTITY_MAX_VEL, delta); }
         else { player.setVelocity(0, delta); }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) { player.changeAngle(-MainWindow.ENTITY_MAX_ANGLE_VEL, delta); }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) { player.changeAngle(MainWindow.ENTITY_MAX_ANGLE_VEL, delta); }
-        // */
+        */
 
         // Skip button check if transitioning
         if (main.transition.active) { return; }

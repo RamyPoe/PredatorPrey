@@ -9,7 +9,7 @@ import com.stemist.simulation.Physics.PhysicsWorld;
 public class GameWorld implements PhysicsTick {
 
     // Used for neural net
-    private float[] netIn = new float[MainWindow.ENTITY_NUM_RAYS+1];
+    private float[] netIn = new float[MainWindow.ENTITY_NUM_RAYS*2+1];
     private float[] netOut;
 
     // Artifically split predators until inital deaths
@@ -59,6 +59,7 @@ public class GameWorld implements PhysicsTick {
             boolean death = updateEnergy(pWorld, e, dt);
             if (death) {
                 numPred--; size--;
+                pWorld.getEntities().get(i).setDead();
                 pWorld.getEntities().remove(i);
                 continue;
             } else { i++; }
@@ -92,9 +93,30 @@ public class GameWorld implements PhysicsTick {
         // No kill if there are the same species
         if (!PhysicsWorld.onePreyOnePred(e1, e2)) { return PhysicsTick.TICK_NO_KILL; } 
 
-        // Find which is pred
+        // Find which is which
         Predator ePred = (Predator) (e1 instanceof Predator ? e1 : e2);
+        Prey ePrey = (Prey) (e1 instanceof Prey ? e1 : e2);
         
+        // See if prey has hit predator
+        float facingSameDir = ePred.getVelocity(1f).angleDeg() - ePrey.getVelocity(1f).angleDeg();
+        facingSameDir = Math.abs(facingSameDir);
+        if (facingSameDir <= MainWindow.PREY_HIT_ANGLE_WINDOW) {
+            // If prey hit predator
+            Vector2 angleToPred = new Vector2(ePred.getPositionVector()).sub(ePrey.getPositionVector());
+            float sameVel = angleToPred.angleDeg()-ePrey.getVelocity(1f).angleDeg();
+            sameVel = Math.abs(sameVel);
+
+            // Prey hit predator
+            if (sameVel <= MainWindow.PREY_HIT_ANGLE_WINDOW) {
+                ePred.reduceHitpoints();
+                if (ePred.isHitpointDead()) {
+                    // Remove predator
+                    ePred.setDead();
+                    return (e1 instanceof Predator ? PhysicsTick.TICK_KILL_1 : PhysicsTick.TICK_KILL_2);
+                }
+            }
+        }
+
         // Kill has been made
         if (!ePred.digesting()) {
 
@@ -106,6 +128,7 @@ public class GameWorld implements PhysicsTick {
             if (ePred.checkSplit()) { addEntity(pWorld, ePred.split()); }
 
             // Remove prey
+            e1.setDead();
             return (e1 instanceof Prey ? PhysicsTick.TICK_KILL_1 : PhysicsTick.TICK_KILL_2);
 
         }
@@ -121,11 +144,12 @@ public class GameWorld implements PhysicsTick {
 
         /* https://www.desmos.com/calculator/tam8eh34fe */
         for (int j = 0; j < MainWindow.ENTITY_NUM_RAYS; j++) {
-            netIn[j] = 1f - e.getRayCollisionOutArr()[j];
+            netIn[j*2] = 1f - e.getRayCollisionOutArr()[j];
+            netIn[j*2+1] = e.getRayHitEnemyArr()[j] ? -1f : 1f;
 
-            // netIn[j] = (netIn[j]) > 0.01f ? 1f : 0f;
-            // netIn[j] = (float) Math.pow(netIn[j], 1f/2f);
-            // netIn[j] = (float) Math.pow(netIn[j], 1f/3f);
+            // If ray didn't hit anything then don't bother
+            if (netIn[j*2] == 0f)
+                netIn[j*2+1] = 0f;
         }
 
         // Bias neuron
@@ -157,6 +181,7 @@ public class GameWorld implements PhysicsTick {
         if (e instanceof Predator) {
             if (e.getEnergy() <= 0) {
                 if (gracePeriod > 0 && numPred < MainWindow.PREDATOR_GRACE_DEATH_THRESHOLD-10) { return false; }
+                e.setDead();
                 return true;
             }
         } else {

@@ -10,6 +10,12 @@ public class Entity extends VerletObject {
     // Entity energy
     protected float energy;
 
+    // If entity is dead
+    private boolean dead = false;
+
+    // If being spectated
+    private boolean spectating = false;
+
     // For drawing and collisions
     private float radius;
     private float radiusSqrd;
@@ -25,7 +31,8 @@ public class Entity extends VerletObject {
 
     // For network inputs
     protected Rays rays;
-    protected float[] rayCollisions;
+    private float[] rayCollisions;
+    private boolean[] rayHitEnemy;
 
     // Neural Network
     protected RtNeat brain;
@@ -49,10 +56,11 @@ public class Entity extends VerletObject {
         v = new Vector2(0, 0);
 
         // Create brain
-        brain = new RtNeat(MainWindow.ENTITY_NUM_RAYS+1, 2).randomMutate();
+        brain = new RtNeat(MainWindow.ENTITY_NUM_RAYS*2+1, 2).randomMutate();
         
         // Create output array for ray collisions
         rayCollisions = new float[MainWindow.ENTITY_NUM_RAYS];
+        rayHitEnemy = new boolean[MainWindow.ENTITY_NUM_RAYS];
 
     }
 
@@ -133,10 +141,19 @@ public class Entity extends VerletObject {
     // Get ray collision outputs
     public Rays getRays() { return rays; }
     public float[] getRayCollisionOutArr() { return rayCollisions; }
+    public boolean[] getRayHitEnemyArr() { return rayHitEnemy; }
     public void resetRayCollisionOutArr() {
         for (int i = 0; i < rayCollisions.length; i++) {
             rayCollisions[i] = 1f;
         }
     }
+
+    // Entity death
+    public void setDead() { dead = true; }
+    public boolean isDead() { return dead; }
+
+    // If being spectated
+    public void setSpectating(boolean b) { spectating = b; }
+    public boolean isSpectating() { return spectating; }
 
 }
