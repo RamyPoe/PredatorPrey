@@ -7,13 +7,6 @@ import com.stemist.simulation.Physics.Rays;
 
 public class Prey extends Entity {
     
-    // For raycasting
-    private static Rays rays;
-    static {
-        // Rays for preys
-        rays = new Rays(MainWindow.PREY_FOV, MainWindow.ENTITY_NUM_RAYS, MainWindow.PREY_SIGHT_RANGE);
-    }
-
     // Split timer
     private float splitTimer;
 
@@ -26,6 +19,9 @@ public class Prey extends Entity {
         
         // Random offset to timer
         splitTimer = MainWindow.SPLIT_TIME_MS + (int) (Math.random() * 200f);
+
+        // Rays for preys
+        rays = new Rays(MainWindow.PREY_FOV, MainWindow.ENTITY_NUM_RAYS, MainWindow.PREY_SIGHT_RANGE);
     }
 
     // Check for reproduction
@@ -62,8 +58,6 @@ public class Prey extends Entity {
         splitTimer -= dt*1000f;
     }
 
-    // Getting prey rays
-    public static Rays getRays() { return rays; }
-
+    
 
 }

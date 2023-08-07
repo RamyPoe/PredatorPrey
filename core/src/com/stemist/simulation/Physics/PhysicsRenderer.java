@@ -4,11 +4,8 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer.ShapeType;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.stemist.simulation.MainWindow;
-import com.stemist.simulation.Game.Predator;
-import com.stemist.simulation.Game.Prey;
 
 public class PhysicsRenderer {
 
@@ -54,7 +51,7 @@ public class PhysicsRenderer {
             
             // Draw a circle
             renderer.setColor(en.getColor());
-            renderer.circle(en.getX(), en.getY(), en.getRadius(), 16); 
+            renderer.circle(en.getX(), en.getY(), en.getRadius(), 8); 
 
             // Show direction
             renderer.setColor(Color.LIGHT_GRAY);
@@ -68,26 +65,24 @@ public class PhysicsRenderer {
             if (!Gdx.input.isKeyPressed(Input.Keys.B)) { continue; }
 
             // Get rays instance
-            Rays rays = en instanceof Prey ? Prey.getRays() : Predator.getRays();
+            Rays rays = en.getRays();
 
             // Ray color
             renderer.setColor(Color.WHITE);
-
-            // Setup for loop
-            float startAngle = en.getAngle() - rays.getFov()/2;
-            float stepAngle = rays.getFov()/(rays.getNumRays()-1);
 
             // Loop through all rays
             for (int j = 0; j < rays.getNumRays(); j++) {
                 
                 // Get angle for this ray
-                float angle = (startAngle + j*stepAngle) % 360;
+                // float angle = (startAngle + j*stepAngle) % 360;
+                Ray r = rays.getRayArray()[j];
 
                 // Get end point of ray
-                Vector2 end = new Vector2(rays.getRayDistance() * en.getRayCollisionOutArr()[j], 0).setAngleDeg(angle).add(en.getPositionVector());
+                float endx = r.origin.x + r.dir.x * r.getMagnitude() * en.getRayCollisionOutArr()[j];
+                float endy = r.origin.y + r.dir.y * r.getMagnitude() * en.getRayCollisionOutArr()[j];
 
                 // Draw ray
-                renderer.rectLine(en.getX(), en.getY(), end.x, end.y, 2);
+                renderer.rectLine(en.getX(), en.getY(), endx, endy, 2);
             }
 
         }

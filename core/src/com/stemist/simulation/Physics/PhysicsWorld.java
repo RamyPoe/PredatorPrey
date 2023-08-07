@@ -18,35 +18,48 @@ public class PhysicsWorld {
     private final float RESPONSE_COEf = 0.2f;
 
     // How many threads
-    private final int NUM_THREADS = 2;
+    private final int NUM_THREADS = 8;
     
     // List of entities
     private Array<Entity> entities;
 
     // For spatial hash grid
     private Array<Entity>[] buckets;
-    private Set<Integer> uniqueVals;
 
     // For responses and game ticks
     private PhysicsTick physicsTick;
 
     // Multi threading
-    ExecutorService executor;
+    private ExecutorService executor;
+    private static enum THREAD_MODE{ RAYCAST, COLLISION, CONSTRAINT, UPDATE, FILL_BUCKETS };
     class PhysicsThread implements Runnable {
+        public THREAD_MODE mode = THREAD_MODE.COLLISION;
         public int i1, i2;
+        public float dt;
         public boolean done = false;
         PhysicsWorld pWorld = null;
+        int id;
 
-        public PhysicsThread(PhysicsWorld pWorld) {
+        public PhysicsThread(PhysicsWorld pWorld, int id) {
             this.pWorld = pWorld;
+            this.id = id;
         }
 
         @Override
         public void run() {
-                try { pWorld.checkRayCast(i1, i2); } catch (Exception e) {}
+            try {
+                if (mode == THREAD_MODE.COLLISION) { pWorld.checkCollisions(i1, i2); }
+                if (mode == THREAD_MODE.RAYCAST) { pWorld.checkRayCast(i1, i2); }
+                else if (mode == THREAD_MODE.CONSTRAINT) { pWorld.applyConstraint(i1, i2); }
+                else if (mode == THREAD_MODE.UPDATE) { pWorld.updateObjects(i1, i2, dt); }
+                else if (mode == THREAD_MODE.FILL_BUCKETS) { pWorld.fillBuckets(i1, i2); }
                 done = true;
+            } catch (Throwable e) {
+                System.out.println("ERROR IN THREAD " + id);
+                e.printStackTrace();
             }
         }
+    }
     
     private PhysicsThread[] physicsThreads;
 
@@ -64,14 +77,11 @@ public class PhysicsWorld {
             buckets[i] = new Array<Entity>();
         }
 
-        // Helper for avoiding duplicates
-        uniqueVals = new HashSet<>();
-
         // Multi threading
-        executor = Executors.newFixedThreadPool(NUM_THREADS);
+        executor = Executors.newFixedThreadPool(NUM_THREADS*2);
         physicsThreads = new PhysicsThread[NUM_THREADS];
         for (int i = 0; i < NUM_THREADS; i++) {
-            physicsThreads[i] = new PhysicsThread(this);
+            physicsThreads[i] = new PhysicsThread(this, i);
         }
 
     }
@@ -87,59 +97,45 @@ public class PhysicsWorld {
     // Solve entity positions
     public void update(float dt) {
 
-        // Count number we have for HUD
-        physicsTick.countEntityPredPrey(this);
-
-        
+        physicsTick.countEntityPredPrey(this);    
         physicsTick.tickEntities(this, dt);
         physicsTick.updateNeuralEntities(this, dt);
         
-        // Add entites to hash grid
+        // Place entities into buckets
         clearBuckets();
-        fillBuckets();
+        callThreadPool(THREAD_MODE.FILL_BUCKETS, dt);
+        awaitThreadsCompletion();
+
+        callThreadPool(THREAD_MODE.COLLISION, dt);
+        awaitThreadsCompletion();
         
-        checkCollisions(dt);
+        // Update each physics model
+        updateObjects(0, entities.size, dt);
+        // callThreadPool(THREAD_MODE.UPDATE, dt);
+        // awaitThreadsCompletion();
         
-        updateObjects(dt);
         
+        // Check all raycasts
+        callThreadPool(THREAD_MODE.RAYCAST, dt);
+        awaitThreadsCompletion();
+
         // double timer = MainWindow.getTimeMs();
-    
-        // Use thread pool
-        for (int i = 0; i < NUM_THREADS; i++) {
-            int step = entities.size/NUM_THREADS-1;
-            int i1 = i * step;
-            int i2 = (i == NUM_THREADS-1 ? entities.size : (i+1)*step);
-            
-            physicsThreads[i].i1 = i1;
-            physicsThreads[i].i2 = i2;
-
-            executor.execute(physicsThreads[i]);
-        }
-        
-
-        // Apply world constraints to entities
-        applyConstraint();
-
-        // Wait until threads are done
-        boolean threadDone = true;
-        do {
-            threadDone = true;
-            for (int i = 0; i < physicsThreads.length; i++) {
-                if (!physicsThreads[i].done) { threadDone = false; }
-            }
-        } while (!threadDone);
-
         // System.out.println(MainWindow.getTimeMs()-timer);
+        
+        // Apply world constraints to entities
+        callThreadPool(THREAD_MODE.CONSTRAINT, dt);
+        awaitThreadsCompletion();
+
 
     }
 
 
 
     // Checks all body and raycast collisions and registers kills
-    private void checkCollisions(float dt) {
+    private void checkCollisions(int i1, int i2) {
 
         // Check collisions in each bucket
-        for (int i = 0; i < buckets.length; i++) {
+        for (int i = i1; i < i2; i++) {
 
             // Check each entity with every other
             for (int j = 0; j < buckets[i].size; j++) {
@@ -196,23 +192,24 @@ public class PhysicsWorld {
     }
 
     // Fills buckets with entites
-    private void fillBuckets() {
+    private void fillBuckets(int i1, int i2) {
 
         // Add each entity
-        for (int i = 0; i < entities.size; i++) {
+        for (int i = i1; i < i2; i++) {
 
             // Get entity
             Entity e = entities.get(i);
 
             // Get bucket for each corner
-            uniqueVals.clear();
-            uniqueVals.add(hashGridBucket(e.getAabbLeft(), e.getAabbTop()));
-            uniqueVals.add(hashGridBucket(e.getAabbRight(), e.getAabbTop()));
-            uniqueVals.add(hashGridBucket(e.getAabbLeft(), e.getAabbBottom()));
-            uniqueVals.add(hashGridBucket(e.getAabbRight(), e.getAabbBottom()));
+            Set<Integer> uniqueValSet = new HashSet<>();
+            uniqueValSet.clear();
+            uniqueValSet.add(hashGridBucket(e.getAabbLeft(), e.getAabbTop()));
+            uniqueValSet.add(hashGridBucket(e.getAabbRight(), e.getAabbTop()));
+            uniqueValSet.add(hashGridBucket(e.getAabbLeft(), e.getAabbBottom()));
+            uniqueValSet.add(hashGridBucket(e.getAabbRight(), e.getAabbBottom()));
             
             // Add entity to its buckets
-            for (int bucket : uniqueVals) {
+            for (int bucket : uniqueValSet) {
                 buckets[bucket].add(e);
             }
 
@@ -220,9 +217,10 @@ public class PhysicsWorld {
     }
     
     // Update the physics model for each entity
-    private void updateObjects(float dt) {
+    private void updateObjects(int i1, int i2, float dt) {
 
-        for (Entity e : entities) {
+        for (int i = i1; i < i2; i++) {
+            Entity e = entities.get(i);
             e.update(dt);
         }
 
@@ -235,9 +233,9 @@ public class PhysicsWorld {
         for (int i = i1; i < i2; i++) {
             Entity e = entities.get(i);
             e.resetRayCollisionOutArr();
-            Rays rays = e instanceof Prey ? Prey.getRays() : Predator.getRays();
+            Rays rays = e.getRays();
             rays.updateResetRays(e);
-
+            
             // Every ray for this entity
             for (int j = 0; j < rays.getNumRays(); j++) {
                 Ray r = rays.getRayArray()[j];
@@ -319,11 +317,12 @@ public class PhysicsWorld {
     }
 
     // Apply world constraints to all entities
-    private void applyConstraint() {
+    private void applyConstraint(int i1, int i2) {
         
         // Game box
-        for (Entity e : entities) {
-            
+        for (int i = i1; i < i2; i++) {
+            Entity e = entities.get(i);
+
             // Position
             Vector2 pos = e.getPositionVector();
             
@@ -345,6 +344,35 @@ public class PhysicsWorld {
 
     }
 
+    // Uses thread pool for function
+    private void callThreadPool(THREAD_MODE mode, float dt) {
+        for (int i = 0; i < NUM_THREADS; i++) {
+            int max = (mode == THREAD_MODE.COLLISION ? buckets.length : entities.size);
+            int step = max/(NUM_THREADS-1);
+            int i1 = i * step;
+            int i2 = (i == NUM_THREADS-1 ? max : (i+1)*step);
+            
+            physicsThreads[i].mode = mode;
+            physicsThreads[i].i1 = i1;
+            physicsThreads[i].i2 = i2;
+            physicsThreads[i].dt = dt;
+            physicsThreads[i].done = false;
+
+            executor.execute(physicsThreads[i]);
+        }
+    }
+
+    // Waits for all threads to be done
+    private void awaitThreadsCompletion() {
+        boolean threadDone = true;
+        do {
+            threadDone = true;
+            for (int i = 0; i < physicsThreads.length; i++) {
+                if (!physicsThreads[i].done) { threadDone = false; }
+            }
+        } while (!threadDone);
+    }
+
     // Make sure value is within bounds
     public static int clamp(int val, int lower, int upper) { return Math.max(Math.min(val, upper), lower); }
     
@@ -356,5 +384,7 @@ public class PhysicsWorld {
         return (e1 instanceof Predator && e2 instanceof Prey) || (e1 instanceof Prey && e2 instanceof Predator);
     }
     
+    // Close all threads
+    public void closeThreads() { executor.shutdownNow(); }
     
 }

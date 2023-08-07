@@ -1,7 +1,6 @@
 package com.stemist.simulation.Physics;
 
 import com.badlogic.gdx.math.Vector2;
-import com.stemist.simulation.MainWindow;
 
 public class Rays {
 

@@ -24,6 +24,7 @@ public class Entity extends VerletObject {
     private Vector2 v;
 
     // For network inputs
+    protected Rays rays;
     protected float[] rayCollisions;
 
     // Neural Network
@@ -130,6 +131,7 @@ public class Entity extends VerletObject {
     public float getEnergy() { return energy; }
 
     // Get ray collision outputs
+    public Rays getRays() { return rays; }
     public float[] getRayCollisionOutArr() { return rayCollisions; }
     public void resetRayCollisionOutArr() {
         for (int i = 0; i < rayCollisions.length; i++) {

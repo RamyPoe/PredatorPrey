@@ -35,7 +35,7 @@ public class MainWindow extends Game {
 
 	// Game Constraints
 	public static final int COLS = 40;
-	public static final int ROWS = 40;
+	public static final int ROWS = 35;
 	public static final int CELL_SIZE = 500;
 
 	public static final int GAME_MAX_LEFT 	= 0;
@@ -44,18 +44,18 @@ public class MainWindow extends Game {
 	public static final int GAME_MAX_TOP 	= ROWS * CELL_SIZE;
 
 	// Game constants
-	public static final int ENTITY_RADIUS = 40;
+	public static final int ENTITY_RADIUS = 30;
 	public static final int ENTITY_MAX_VEL = 700;
 	public static final int ENTITY_MAX_ANGLE_VEL = 500;
 	public static final int ENTITY_MAX_ENERGY = 100;
 	public static final float VEL_ENERGY_DEPLETION = 2;
-	public static final int ENTITY_NUM_RAYS = 20;
+	public static final int ENTITY_NUM_RAYS = 12;
 	
 	// Spawning
 	public static final float CHANCE_INITIAL_PREY = 0.8f;
 	
 	// Predator
-	public static final int MAX_PREDATORS = 460;
+	public static final int MAX_PREDATORS = 920;
 	public static final int PREDATOR_GRACE_PERIOD = 2000;
 	public static final int PREDATOR_GRACE_DEATH_THRESHOLD = 200;
 	public static final int PREDATOR_GRACE_TIMER = 4000;
@@ -70,7 +70,7 @@ public class MainWindow extends Game {
 	public static final int PREDATOR_SIGHT_RANGE = 9000;
 	
 	// Prey
-	public static final int MAX_PREY = 2400;
+	public static final int MAX_PREY = 4800;
 	public static final int SPLIT_TIME_MS = 5000;
 
 	public static final float IDLE_ENERGY_GAIN = 0.5f;
@@ -85,7 +85,7 @@ public class MainWindow extends Game {
 		batch = new SpriteBatch();
 
 		// Set window size
-		Gdx.graphics.setWindowedMode(1200, 800);
+		Gdx.graphics.setWindowedMode(V_WIDTH, V_HEIGHT);
 
 		// Setup transition
 		transition = new Transition(4f);
