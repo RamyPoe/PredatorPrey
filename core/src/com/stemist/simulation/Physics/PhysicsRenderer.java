@@ -1,4 +1,6 @@
 package com.stemist.simulation.Physics;
+import java.util.List;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
@@ -43,10 +45,10 @@ public class PhysicsRenderer {
         }
 
         // Get list of entities
-        Array<Entity> e = pWorld.getEntities();
+        List<Entity> e = pWorld.getEntities();
 
         // Render every shape
-        for (int i = 0; i < e.size; i++) {
+        for (int i = 0; i < e.size(); i++) {
             Entity en = e.get(i);
             
             // Draw a circle

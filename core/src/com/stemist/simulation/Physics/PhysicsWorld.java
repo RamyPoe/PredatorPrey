@@ -1,10 +1,13 @@
 package com.stemist.simulation.Physics;
 
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.List;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -21,7 +24,7 @@ public class PhysicsWorld {
     private final int NUM_THREADS = 8;
     
     // List of entities
-    private Array<Entity> entities;
+    private List<Entity> entities;
 
     // For spatial hash grid
     private Array<Entity>[] buckets;
@@ -69,7 +72,7 @@ public class PhysicsWorld {
         this.physicsTick = physicsTick;
 
         // Create array
-        entities = new Array<>();
+        entities = (List<Entity>) Collections.synchronizedList(new ArrayList<Entity>());
 
         // Create buckets
         buckets = new Array[MainWindow.COLS*MainWindow.ROWS];
@@ -90,7 +93,7 @@ public class PhysicsWorld {
     public void addEntity(Entity e) { entities.add(e); }
 
     // Remove entity
-    private void removeEntityVal(Entity e) { entities.removeValue(e, true); }
+    private void removeEntityVal(Entity e) { entities.remove(e); }
 
 
 
@@ -103,16 +106,14 @@ public class PhysicsWorld {
         
         // Place entities into buckets
         clearBuckets();
-        callThreadPool(THREAD_MODE.FILL_BUCKETS, dt);
-        awaitThreadsCompletion();
+        fillBuckets(0, entities.size());
 
         callThreadPool(THREAD_MODE.COLLISION, dt);
         awaitThreadsCompletion();
         
         // Update each physics model
-        updateObjects(0, entities.size, dt);
-        // callThreadPool(THREAD_MODE.UPDATE, dt);
-        // awaitThreadsCompletion();
+        callThreadPool(THREAD_MODE.UPDATE, dt);
+        awaitThreadsCompletion();
         
         
         // Check all raycasts
@@ -347,7 +348,7 @@ public class PhysicsWorld {
     // Uses thread pool for function
     private void callThreadPool(THREAD_MODE mode, float dt) {
         for (int i = 0; i < NUM_THREADS; i++) {
-            int max = (mode == THREAD_MODE.COLLISION ? buckets.length : entities.size);
+            int max = (mode == THREAD_MODE.COLLISION ? buckets.length : entities.size());
             int step = max/(NUM_THREADS-1);
             int i1 = i * step;
             int i2 = (i == NUM_THREADS-1 ? max : (i+1)*step);
@@ -377,7 +378,7 @@ public class PhysicsWorld {
     public static int clamp(int val, int lower, int upper) { return Math.max(Math.min(val, upper), lower); }
     
     // Get the list of entites
-    public Array<Entity> getEntities() { return entities; }
+    public List<Entity> getEntities() { return entities; }
     
     // If either one is prey and the other is pred return true
     public static boolean onePreyOnePred(Entity e1, Entity e2) { 

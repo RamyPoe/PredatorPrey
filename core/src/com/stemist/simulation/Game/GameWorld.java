@@ -36,7 +36,7 @@ public class GameWorld implements PhysicsTick {
     @Override
     public void countEntityPredPrey(PhysicsWorld pWorld) {
         numPred = 0; numPrey = 0;
-        for (int i = 0; i < pWorld.getEntities().size; i++) {
+        for (int i = 0; i < pWorld.getEntities().size(); i++) {
             if (pWorld.getEntities().get(i) instanceof Prey) { numPrey++; }
             else if (pWorld.getEntities().get(i) instanceof Predator) { numPred++; }
         }
@@ -49,7 +49,7 @@ public class GameWorld implements PhysicsTick {
         graceTimer -= dt*1000f;
 
         // Avoid the children made
-        int size = pWorld.getEntities().size;
+        int size = pWorld.getEntities().size();
 
         // Tick every entity
         for (int i = 0; i < size;) {
@@ -59,7 +59,7 @@ public class GameWorld implements PhysicsTick {
             boolean death = updateEnergy(pWorld, e, dt);
             if (death) {
                 numPred--; size--;
-                pWorld.getEntities().removeIndex(i);
+                pWorld.getEntities().remove(i);
                 continue;
             } else { i++; }
 
@@ -80,7 +80,7 @@ public class GameWorld implements PhysicsTick {
 
     @Override
     public void updateNeuralEntities(PhysicsWorld pWorld, float dt) {
-        for (int i = 0; i < pWorld.getEntities().size; i++) {
+        for (int i = 0; i < pWorld.getEntities().size(); i++) {
             Entity e = pWorld.getEntities().get(i);
             updateNeuralNetRays(e, dt);
         }
